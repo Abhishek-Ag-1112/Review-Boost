@@ -1,0 +1,21 @@
+{
+  "review_page": {
+    "tagline_default": "How was your experience today?",
+    "happy_heading": "Wonderful! Share your experience",
+    "sad_heading": "We're sorry to hear that",
+    "sad_subtext": "Tell us what went wrong — we'll make it right",
+    "feedback_placeholder": "What could we improve?",
+    "feedback_submit": "Send feedback",
+    "google_link_text": "You can also share your experience publicly on Google",
+    "suggestion_disclaimer": "These are suggestions — edit them to describe your real experience.",
+    "thankyou_happy": "Thank you! Your review helps us grow.",
+    "thankyou_sad": "Thank you for letting us know. We will be in touch.",
+    "name_label": "Your Name (Optional)",
+    "phone_label": "Your Phone Number (Optional)",
+    "stars_label": "Select star rating"
+  },
+  "common": {
+    "post_on_google": "Post on Google",
+    "skip_to_google": "Skip — go directly to Google"
+  }
+}
