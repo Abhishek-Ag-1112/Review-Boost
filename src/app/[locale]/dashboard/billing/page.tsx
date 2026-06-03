@@ -10,11 +10,13 @@ import {
   ShieldCheck, 
   AlertCircle,
   TrendingUp,
+  TrendingDown,
   Store,
   Calendar,
   MessageCircle,
   Mail,
   ArrowUpRight,
+  ArrowDownRight,
   Sparkles,
   Lock,
   CheckCircle2
@@ -34,6 +36,7 @@ export default function BillingPage({ params }: BillingPageProps) {
   const [business, setBusiness] = useState<Business | null>(null);
   const [requestSending, setRequestSending] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [selectedChange, setSelectedChange] = useState<'upgrade' | 'downgrade' | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -81,22 +84,23 @@ export default function BillingPage({ params }: BillingPageProps) {
   const supportEmail = 'billing@reviewboost.com';
   const supportPhone = '+919876543210';
 
-  const getNextPlan = (): 'starter' | 'growth' | null => {
-    if (business.plan === 'free') return 'starter';
-    if (business.plan === 'starter') return 'growth';
-    return null; // Already on growth
-  };
-
-  const nextPlan = getNextPlan();
-
   const planLabels: Record<string, string> = {
     free: 'Free Trial',
     starter: 'Starter (₹399/mo)',
     growth: 'Growth (₹799/mo)',
   };
 
-  const handleRequestUpgrade = async () => {
-    if (!nextPlan) return;
+  // Determine available upgrade and downgrade plans
+  const upgradePlan: 'starter' | 'growth' | null = 
+    business.plan === 'free' ? 'starter' : business.plan === 'starter' ? 'growth' : null;
+  const downgradePlan: 'starter' | 'free' | null = 
+    business.plan === 'growth' ? 'starter' : business.plan === 'starter' ? 'free' : null;
+
+  const targetPlan = selectedChange === 'upgrade' ? upgradePlan : selectedChange === 'downgrade' ? downgradePlan : upgradePlan;
+  const canChange = upgradePlan || downgradePlan;
+
+  const handleRequestPlanChange = async (plan: string) => {
+    if (!plan) return;
     setRequestSending(true);
     try {
       const res = await fetch('/api/upgrade-request', {
@@ -106,7 +110,7 @@ export default function BillingPage({ params }: BillingPageProps) {
           business_id: business.id,
           business_name: business.name,
           current_plan: business.plan,
-          requested_plan: nextPlan,
+          requested_plan: plan,
           contact_email: business.notification_email,
           contact_phone: business.whatsapp_number,
         })
@@ -115,7 +119,7 @@ export default function BillingPage({ params }: BillingPageProps) {
       if (res.ok) {
         setRequestSent(true);
       } else {
-        alert('Failed to submit upgrade request. Please try contacting support directly.');
+        alert('Failed to submit plan change request. Please try contacting support directly.');
       }
     } catch {
       alert('Network error. Please try again or contact support.');
@@ -124,8 +128,9 @@ export default function BillingPage({ params }: BillingPageProps) {
     }
   };
 
-  const messageText = `Hello ReviewBoost Support, I would like to upgrade my business "${business.name}" from ${planLabels[business.plan]} to ${nextPlan ? planLabels[nextPlan] : 'a higher plan'}. Please coordinate the invoice and activation.`;
-  const emailUrl = `mailto:${supportEmail}?subject=ReviewBoost%20Upgrade%20Request&body=${encodeURIComponent(messageText)}`;
+  const changeDirection = selectedChange === 'downgrade' ? 'downgrade' : 'upgrade';
+  const messageText = `Hello ReviewBoost Support, I would like to change my business "${business.name}" plan from ${planLabels[business.plan]} to ${targetPlan ? planLabels[targetPlan] : 'another plan'}. Please coordinate.`;
+  const emailUrl = `mailto:${supportEmail}?subject=ReviewBoost%20Plan%20Change%20Request&body=${encodeURIComponent(messageText)}`;
   const whatsappUrl = `https://wa.me/${supportPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(messageText)}`;
 
   return (
@@ -287,89 +292,79 @@ export default function BillingPage({ params }: BillingPageProps) {
         </div>
       </div>
 
-      {/* Upgrade Request Section */}
-      {nextPlan ? (
+      {/* Plan Change Request Section */}
+      {canChange ? (
         <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-sm">
           {requestSent ? (
             <div className="text-center py-6 flex flex-col items-center">
               <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 border border-emerald-100">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Upgrade Request Submitted!</h3>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Plan Change Request Submitted!</h3>
               <p className="text-xs font-semibold text-slate-400 mt-2 max-w-sm leading-relaxed">
-                Our admin team has been notified. They will review your request and activate your <strong className="text-emerald-700">{planLabels[nextPlan]}</strong> plan shortly. You can also reach out directly:
+                Our admin team has been notified. They will review your request and update your plan shortly. You can also reach out directly:
               </p>
               <div className="flex gap-3 mt-6">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-5 rounded-xl font-bold text-xs transition-all shadow-sm"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp</span>
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-5 rounded-xl font-bold text-xs transition-all shadow-sm">
+                  <MessageCircle className="w-4 h-4" /><span>WhatsApp</span>
                 </a>
-                <a
-                  href={emailUrl}
-                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-5 rounded-xl font-bold text-xs transition-all shadow-sm"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Email</span>
+                <a href={emailUrl} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-5 rounded-xl font-bold text-xs transition-all shadow-sm">
+                  <Mail className="w-4 h-4" /><span>Email</span>
                 </a>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
-                  <h3 className="font-black text-slate-800 text-sm">Ready to upgrade?</h3>
-                </div>
-                <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-                  Upgrade from <strong className="text-slate-700">{planLabels[business.plan]}</strong> to <strong className="text-indigo-600">{planLabels[nextPlan]}</strong>. Submit a request and our admin team will activate it for you. You can also contact support directly via WhatsApp or Email.
-                </p>
+            <div className="space-y-5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-black text-slate-800 text-sm">Change Your Plan</h3>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                <button
-                  onClick={handleRequestUpgrade}
-                  disabled={requestSending}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-bold text-xs transition-all shadow-md hover:shadow-indigo-100 flex items-center justify-center gap-1.5 disabled:opacity-50"
-                >
-                  {requestSending ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <ArrowUpRight className="w-4 h-4" />
-                      <span>Request Upgrade</span>
-                    </>
-                  )}
-                </button>
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp</span>
+              <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                You are currently on <strong className="text-slate-700">{planLabels[business.plan]}</strong>. Submit a request below and our admin team will process the change.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {upgradePlan && (
+                  <button
+                    onClick={() => handleRequestPlanChange(upgradePlan)}
+                    disabled={requestSending}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-bold text-xs transition-all shadow-md hover:shadow-indigo-100 flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    {requestSending ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <><ArrowUpRight className="w-4 h-4" /><span>Upgrade to {planLabels[upgradePlan]}</span></>
+                    )}
+                  </button>
+                )}
+                {downgradePlan && (
+                  <button
+                    onClick={() => handleRequestPlanChange(downgradePlan)}
+                    disabled={requestSending}
+                    className="bg-white border-2 border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 text-slate-700 py-3 px-6 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    {requestSending ? (
+                      <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <><ArrowDownRight className="w-4 h-4 text-rose-500" /><span>Downgrade to {planLabels[downgradePlan]}</span></>
+                    )}
+                  </button>
+                )}
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
+                  <MessageCircle className="w-4 h-4" /><span>WhatsApp</span>
                 </a>
-                <a
-                  href={emailUrl}
-                  className="bg-slate-800 hover:bg-slate-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Email</span>
+                <a href={emailUrl} className="bg-slate-800 hover:bg-slate-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
+                  <Mail className="w-4 h-4" /><span>Email</span>
                 </a>
               </div>
             </div>
           )}
         </div>
       ) : (
-        <div className="bg-indigo-50/30 border border-indigo-100 rounded-3xl p-6 text-center">
-          <TrendingUp className="w-8 h-8 text-indigo-500 mx-auto mb-3" />
-          <h3 className="font-black text-slate-800 text-sm">You&apos;re on the highest plan!</h3>
+        <div className="bg-slate-50/50 border border-slate-100 rounded-3xl p-6 text-center">
+          <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto mb-3" />
+          <h3 className="font-black text-slate-800 text-sm">You&apos;re on the Free Trial</h3>
           <p className="text-xs font-semibold text-slate-400 mt-1">
-            You have access to all ReviewBoost features. For enterprise or custom needs, contact support.
+            Contact support to get started with a paid plan.
           </p>
         </div>
       )}

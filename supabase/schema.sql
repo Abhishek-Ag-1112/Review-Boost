@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS public.upgrade_requests (
   business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
   business_name TEXT NOT NULL,
   current_plan TEXT NOT NULL,
-  requested_plan TEXT NOT NULL CHECK (requested_plan IN ('starter', 'growth')),
+  requested_plan TEXT NOT NULL CHECK (requested_plan IN ('free', 'starter', 'growth')),
   contact_email TEXT,
   contact_phone TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),

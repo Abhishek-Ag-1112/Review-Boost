@@ -110,8 +110,9 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
   const handleDownloadPDF = async (size: 'a4' | 'a5' | 'card') => {
     setDownloadingPdf(size);
     try {
-      // Get the QR code image from the canvas (level H with logo overlay)
-      const canvas = document.getElementById('qr-canvas-display') as HTMLCanvasElement;
+      // Get the QR code from the CLEAN canvas (no logo = no cross-origin taint)
+      // The server-side PDF route handles logo embedding separately
+      const canvas = document.getElementById('qr-canvas-clean') as HTMLCanvasElement;
       if (!canvas) return;
       const qrDataUrl = canvas.toDataURL('image/png');
 
@@ -211,6 +212,14 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
                   }
                 : undefined
             }
+          />
+          {/* Clean canvas WITHOUT logo for PDF export (avoids cross-origin taint) */}
+          <QRCodeCanvas
+            id="qr-canvas-clean"
+            value={reviewUrl}
+            size={512}
+            level="H"
+            includeMargin={true}
           />
           {/* SVG renderer container */}
           <div id="qr-svg-container">

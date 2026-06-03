@@ -1295,7 +1295,7 @@ export interface UpgradeRequest {
   business_id: string;
   business_name: string;
   current_plan: string;
-  requested_plan: 'starter' | 'growth';
+  requested_plan: 'free' | 'starter' | 'growth';
   contact_email: string | null;
   contact_phone: string | null;
   status: 'pending' | 'approved' | 'rejected';
@@ -1309,7 +1309,7 @@ export async function createUpgradeRequest(data: {
   business_id: string;
   business_name: string;
   current_plan: string;
-  requested_plan: 'starter' | 'growth';
+  requested_plan: 'free' | 'starter' | 'growth';
   contact_email?: string | null;
   contact_phone?: string | null;
 }): Promise<UpgradeRequest | null> {

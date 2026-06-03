@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!['starter', 'growth'].includes(requested_plan)) {
+    if (!['free', 'starter', 'growth'].includes(requested_plan)) {
       return NextResponse.json({ error: 'Invalid requested plan' }, { status: 400 });
     }
 
