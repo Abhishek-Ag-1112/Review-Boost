@@ -2,6 +2,11 @@ import { notFound } from 'next/navigation';
 import { getBusinessBySlug, getScansCountThisMonth } from '@/lib/db';
 import ReviewFunnel from './ReviewFunnel';
 
+// Force dynamic rendering — never cache this page
+// Suspension/trial/payment status must be checked fresh on every visit
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ReviewPageProps {
   params: {
     locale: string;

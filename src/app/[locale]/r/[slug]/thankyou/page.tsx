@@ -4,6 +4,9 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { CheckCircle2 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ThankYouProps {
   params: {
     locale: string;
