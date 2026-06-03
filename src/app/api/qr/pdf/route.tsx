@@ -125,8 +125,8 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
 
   return (
     <Document>
-      <Page 
-        size={isCard ? [240, 160] : (isA5 ? 'A5' : 'A4')} 
+      <Page
+        size={isCard ? [240, 160] : (isA5 ? 'A5' : 'A4')}
         style={[styles.page, ...(isCard ? [{ padding: 10 }] : [])]}
       >
         <View style={[styles.cardContainer, ...(isCard ? [{ paddingVertical: 14, paddingHorizontal: 12, borderRadius: 16 }] : [])]}>
@@ -136,18 +136,18 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
           {/* Header Block */}
           <View style={styles.headerBlock}>
             {logoDataUrl && (
-              <Image 
-                src={logoDataUrl} 
+              <Image
+                src={logoDataUrl}
                 style={[
-                  styles.logo, 
-                  { 
-                    width: logoSize, 
-                    height: logoSize, 
-                    borderRadius: logoSize / 2, 
+                  styles.logo,
+                  {
+                    width: logoSize,
+                    height: logoSize,
+                    borderRadius: logoSize / 2,
                     borderWidth: isCard ? 1 : 1.5,
-                    marginBottom: isCard ? 4 : 12 
+                    marginBottom: isCard ? 4 : 12
                   }
-                ]} 
+                ]}
               />
             )}
             <Text style={[styles.businessName, { fontSize: isCard ? 11 : (isA5 ? 20 : 24), marginBottom: isCard ? 2 : 6 }]}>
@@ -160,18 +160,18 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
 
           {/* QR Code Container Wrapper */}
           <View style={[styles.qrWrapper, ...(isCard ? [{ padding: 8, borderRadius: 10 }] : []), { width: qrSize + (isCard ? 16 : 32), height: qrSize + (isCard ? 16 : 32) }]}>
-            <Image 
-              src={qrDataUrl} 
-              style={{ width: qrSize, height: qrSize }} 
+            <Image
+              src={qrDataUrl}
+              style={{ width: qrSize, height: qrSize }}
             />
           </View>
 
           {/* Footer block */}
           <View style={styles.footerBlock}>
-            <Text 
+            <Text
               style={[
-                styles.ctaPill, 
-                { 
+                styles.ctaPill,
+                {
                   backgroundColor: brandColor || '#059669',
                   fontSize: isCard ? 8 : 11,
                   paddingVertical: isCard ? 5 : 8,
@@ -216,9 +216,9 @@ export async function POST(request: NextRequest) {
     let logoDataUrl = null;
     if (logoUrl && typeof logoUrl === 'string' && logoUrl.startsWith('http')) {
       try {
-        const logoRes = await fetch(logoUrl, { 
+        const logoRes = await fetch(logoUrl, {
           headers: { 'User-Agent': 'Mozilla/5.0' },
-          next: { revalidate: 600 } 
+          next: { revalidate: 600 }
         });
         if (logoRes.ok) {
           const arrayBuffer = await logoRes.arrayBuffer();
@@ -233,12 +233,12 @@ export async function POST(request: NextRequest) {
 
     // Render PDF Document to Buffer stream
     const blob = await pdf(
-      <PrintTemplate 
-        qrDataUrl={qrDataUrl} 
-        businessName={businessName} 
-        tagline={tagline} 
-        brandColor={brandColor} 
-        size={size} 
+      <PrintTemplate
+        qrDataUrl={qrDataUrl}
+        businessName={businessName}
+        tagline={tagline}
+        brandColor={brandColor}
+        size={size}
         logoDataUrl={logoDataUrl}
       />
     ).toBlob();
