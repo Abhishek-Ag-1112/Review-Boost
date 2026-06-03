@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validatePublicApiRequest } from '@/lib/apiAuth';
-import { getReviewsInbox } from '@/lib/db';
+import { getReviewsInbox, Review } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   // 1. Authorize & rate-limit request
@@ -34,13 +34,13 @@ export async function GET(req: NextRequest) {
     if (startDateParam) {
       const startDate = new Date(startDateParam);
       if (!isNaN(startDate.getTime())) {
-        reviews = reviews.filter(r => new Date(r.created_at) >= startDate);
+        reviews = reviews.filter((r: Review) => new Date(r.created_at) >= startDate);
       }
     }
     if (endDateParam) {
       const endDate = new Date(endDateParam);
       if (!isNaN(endDate.getTime())) {
-        reviews = reviews.filter(r => new Date(r.created_at) <= endDate);
+        reviews = reviews.filter((r: Review) => new Date(r.created_at) <= endDate);
       }
     }
 
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
         business_id: business.id,
         business_name: business.name,
         count: reviews.length,
-        reviews: reviews.map(r => ({
+        reviews: reviews.map((r: Review) => ({
           id: r.id,
           stars: r.stars,
           is_public: r.is_public,
