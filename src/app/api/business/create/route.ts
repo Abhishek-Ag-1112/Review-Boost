@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
       const decodedSession = await verifyFirebaseSession(sessionCookie);
       uid = decodedSession.uid;
     } catch (err) {
+      console.error('API /business/create: Auth verification failed. Error:', err);
       return NextResponse.json({ error: 'Unauthorized. Invalid session.' }, { status: 401 });
     }
 

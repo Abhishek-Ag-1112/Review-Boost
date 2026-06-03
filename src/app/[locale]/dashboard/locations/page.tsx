@@ -52,7 +52,7 @@ export default function LocationsPage({ params }: { params: { locale: string } }
       const b = await getFirstBusinessForOwner('mock-owner');
       if (b) {
         setBusiness(b);
-        if (b.plan === 'growth' || b.plan === 'starter' || b.plan === 'trial') {
+        if (b.plan === 'growth' || b.plan === 'starter' || b.plan === 'free') {
           const locs = await getLocations(b.id);
           setLocations(locs);
         }
@@ -161,7 +161,7 @@ export default function LocationsPage({ params }: { params: { locale: string } }
         </div>
         <button
           onClick={() => {
-            if ((business.plan === 'starter' || business.plan === 'trial') && locations.length >= 1) {
+            if ((business.plan === 'starter' || business.plan === 'free') && locations.length >= 1) {
               setShowUpgradeModal(true);
             } else if (business.plan === 'growth' && locations.length >= 10) {
               alert('You have reached the maximum limit of 10 locations on the Growth plan.');

@@ -34,12 +34,12 @@ export async function validatePublicApiRequest(req: NextRequest): Promise<AuthRe
     };
   }
 
-  // Gate check: Only Agency plan businesses can access public APIs
-  if (business.plan !== 'agency') {
+  // Gate check: Only Growth plan businesses can access public APIs
+  if (business.plan !== 'growth') {
     return {
       authorized: false,
       response: NextResponse.json(
-        { error: 'API access is gated to Agency subscription level. Please upgrade your plan.' },
+        { error: 'API access is available on the Growth plan. Please upgrade your plan.' },
         { status: 403 }
       )
     };

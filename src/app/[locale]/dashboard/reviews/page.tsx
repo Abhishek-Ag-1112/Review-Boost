@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getReviewsInbox, getFirstBusinessForOwner, Business } from '@/lib/db';
+import { getReviewsInbox, getFirstBusinessForOwner, Business, Review } from '@/lib/db';
 import { 
   Search, 
   Star, 
@@ -36,7 +36,7 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'stars_desc' | 'stars_asc'>('newest');
 
   // Reviews Data
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   // Notes editing states
   const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
@@ -77,7 +77,7 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       setReviews(data);
       // Pre-fill notes inputs
       const notes: Record<string, string> = {};
-      data.forEach(r => {
+      (data || []).forEach((r: Review) => {
         notes[r.id] = r.owner_note || '';
       });
       setEditingNotes(notes);

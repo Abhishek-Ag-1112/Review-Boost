@@ -1,41 +1,45 @@
-import * as admin from 'firebase-admin';
+import { createClient as createSupabaseRawClient } from '@supabase/supabase-js';
 
-// Check if credentials are set. If not, run in mock mode
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Mock mode if Supabase credentials are not set or are default
 export const isFirebaseAdminMock =
-  !process.env.FIREBASE_CLIENT_EMAIL ||
-  !process.env.FIREBASE_PRIVATE_KEY ||
-  process.env.FIREBASE_CLIENT_EMAIL.includes('your-firebase');
+  !supabaseUrl ||
+  !supabaseAnonKey ||
+  supabaseUrl.includes('your-project');
 
-if (!isFirebaseAdminMock && admin.apps.length === 0) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-  } catch (error) {
-    console.error('Failed to initialize Firebase Admin SDK:', error);
-  }
-}
+export const adminAuth = null as any;
 
-export const adminAuth = !isFirebaseAdminMock ? admin.auth() : null;
-
-// Helper to verify the secure session cookie
+// Helper to verify the secure session cookie (using Supabase Auth getUser)
 export async function verifyFirebaseSession(sessionCookie: string) {
   if (isFirebaseAdminMock) {
-    if (sessionCookie === 'mock-jwt-token' || sessionCookie === 'mock-session-cookie') {
-      return { uid: 'mock-owner', email: 'merchant@reviewboost.com' };
+    if (
+      sessionCookie === 'mock-jwt-token' ||
+      sessionCookie === 'mock-session-cookie' ||
+      sessionCookie === 'mock-admin-session-cookie'
+    ) {
+      const email = sessionCookie === 'mock-admin-session-cookie'
+        ? (process.env.ADMIN_EMAIL || 'admin@reviewboost.com')
+        : 'merchant@reviewboost.com';
+      return { uid: 'mock-owner', email };
     }
     throw new Error('Invalid mock session cookie');
   }
 
-  if (!adminAuth) {
-    throw new Error('Firebase Admin SDK not initialized');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase client not initialized. Check credentials in .env.local');
   }
 
-  // Verifies the session cookie. Will throw if expired or revoked
-  const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-  return decodedToken;
+  // We initialize the raw Supabase client to verify the JWT session token
+  const supabase = createSupabaseRawClient(supabaseUrl, supabaseAnonKey);
+  const { data, error } = await supabase.auth.getUser(sessionCookie);
+
+  if (error || !data || !data.user) {
+    console.error('verifyFirebaseSession error: failed to get user from Supabase.', 'Error:', error, 'Cookie snippet:', sessionCookie ? sessionCookie.substring(0, 15) + '...' : 'none');
+    throw new Error(error?.message || 'Invalid or expired session token');
+  }
+
+  const user = data.user;
+  return { uid: user.id, email: user.email! };
 }

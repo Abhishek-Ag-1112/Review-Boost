@@ -73,7 +73,7 @@ export interface Business {
   tagline: string;
   category: 'restaurant' | 'retail' | 'salon' | 'clinic' | 'hotel' | 'other';
   language: string;
-  plan: 'trial' | 'starter' | 'growth';
+  plan: 'free' | 'starter' | 'growth';
   trial_started_at: string;
   trial_ended: boolean;
   whatsapp_number: string | null;
@@ -141,7 +141,7 @@ const mockBusinesses: Record<string, Business> = {
     tagline: 'Rate your styling experience!',
     category: 'salon',
     language: 'en',
-    plan: 'trial',
+    plan: 'free',
     trial_started_at: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(), // 26 days ago (4 days left)
     trial_ended: false,
     whatsapp_number: '+919999999999',
@@ -165,7 +165,7 @@ const mockBusinesses: Record<string, Business> = {
     tagline: 'Rate our fresh pizza slice!',
     category: 'restaurant',
     language: 'en',
-    plan: 'trial',
+    plan: 'free',
     trial_started_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(), // 35 days ago (expired)
     trial_ended: true,
     whatsapp_number: '+919999988888',
@@ -450,7 +450,7 @@ export async function createBusiness(businessData: Partial<Business>): Promise<B
     tagline: businessData.tagline || 'How was your experience today?',
     category: businessData.category || 'other',
     language: businessData.language || 'en',
-    plan: businessData.plan || 'trial',
+    plan: businessData.plan || 'free',
     trial_started_at: businessData.trial_started_at || new Date().toISOString(),
     trial_ended: businessData.trial_ended !== undefined ? businessData.trial_ended : false,
     whatsapp_number: businessData.whatsapp_number || null,
@@ -467,6 +467,7 @@ export async function createBusiness(businessData: Partial<Business>): Promise<B
 
   const insertPayload = { ...newBusiness };
   delete (insertPayload as any).id;
+  delete (insertPayload as any).nfc_enabled;
 
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
@@ -689,10 +690,14 @@ export async function updateBusinessSettings(businessId: string, data: Partial<B
     return null;
   }
 
+  const updatePayload = { ...data };
+  delete (updatePayload as any).id;
+  delete (updatePayload as any).nfc_enabled;
+
   const supabase = getSupabaseClient();
   const { data: updated, error } = await supabase
     .from('businesses')
-    .update(data)
+    .update(updatePayload)
     .eq('id', businessId)
     .select()
     .single();
@@ -1062,7 +1067,7 @@ export async function getBusinessByApiKey(apiKey: string) {
     return null;
   }
 
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from('businesses')
     .select('*')
@@ -1109,7 +1114,7 @@ export async function toggleLocationActive(locationId: string, isActive: boolean
     return false;
   }
 
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const { error } = await supabase
     .from('locations')
     .update({ is_active: isActive })
@@ -1132,7 +1137,7 @@ export async function deleteNfcCard(cardId: string): Promise<boolean> {
     return false;
   }
 
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
   const { error } = await supabase
     .from('nfc_cards')
     .delete()

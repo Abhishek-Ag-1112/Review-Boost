@@ -158,11 +158,11 @@ export default function BillingPage({ params }: BillingPageProps) {
           </div>
 
           {/* Plan Status Badges */}
-          {business.plan === 'trial' ? (
+          {business.plan === 'free' ? (
             <div className="space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-slate-700">Free Trial Progress</span>
+                  <span className="text-xs font-black text-slate-700">Free Plan Progress</span>
                   <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 border border-amber-100 text-amber-700 uppercase tracking-wide">
                     {remainingDays} Days Left
                   </span>
@@ -178,8 +178,8 @@ export default function BillingPage({ params }: BillingPageProps) {
               </div>
               <p className="text-[10px] text-slate-400 font-semibold leading-normal">
                 {business.trial_ended 
-                  ? "❌ Your free trial expired. Please select a plan below to reactive and keep scans flowing." 
-                  : "💡 Enjoying the trial? Select Starter or Growth below. Your payment will only start when trial period expires!"}
+                  ? "❌ Your free plan period expired. Please select a plan below to reactivate and keep scans flowing." 
+                  : "💡 Enjoying the free plan? Select Starter or Growth below. Your payment will only start when free period expires!"}
               </p>
             </div>
           ) : (
@@ -203,10 +203,10 @@ export default function BillingPage({ params }: BillingPageProps) {
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Active Plan Summary</span>
             <div>
               <h4 className="text-xl font-black text-slate-800">
-                {business.plan === 'trial' ? 'Free Trial Period' : business.plan === 'starter' ? 'Starter Tier' : 'Growth Tier'}
+                {business.plan === 'free' ? 'Free Plan Period' : business.plan === 'starter' ? 'Starter Tier' : 'Growth Tier'}
               </h4>
               <span className="text-xs font-bold text-slate-400 block mt-1">
-                {business.plan === 'trial' ? 'Full Growth Access' : business.plan === 'starter' ? '₹399/month' : '₹799/month'}
+                {business.plan === 'free' ? 'Full Growth Access' : business.plan === 'starter' ? '₹399/month' : '₹799/month'}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 mt-2">

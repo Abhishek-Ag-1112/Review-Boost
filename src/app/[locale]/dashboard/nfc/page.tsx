@@ -67,7 +67,7 @@ export default function NfcCardsPage({ params }: { params: { locale: string } })
       const b = await getFirstBusinessForOwner('mock-owner');
       if (b) {
         setBusiness(b);
-        if (b.plan === 'growth' || b.plan === 'starter' || b.plan === 'trial') {
+        if (b.plan === 'growth' || b.plan === 'starter' || b.plan === 'free') {
           const [cards, locs] = await Promise.all([
             getNfcCards(b.id),
             getLocations(b.id)
@@ -216,7 +216,7 @@ export default function NfcCardsPage({ params }: { params: { locale: string } })
         </div>
         <button
           onClick={() => {
-            if ((business.plan === 'starter' || business.plan === 'trial') && nfcCards.length >= 1) {
+            if ((business.plan === 'starter' || business.plan === 'free') && nfcCards.length >= 1) {
               setShowUpgradeModal(true);
             } else if (business.plan === 'growth' && nfcCards.length >= 10) {
               alert('You have reached the maximum limit of 10 NFC cards on the Growth plan.');

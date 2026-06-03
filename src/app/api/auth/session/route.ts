@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { isFirebaseAdminMock, adminAuth } from '@/lib/firebase-admin';
+import { isFirebaseAdminMock } from '@/lib/firebase-admin';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,12 +14,10 @@ export async function POST(req: NextRequest) {
     const expiresIn = 14 * 24 * 60 * 60 * 1000; // 14 days
 
     if (isFirebaseAdminMock) {
-      sessionCookie = 'mock-session-cookie';
+      sessionCookie = idToken === 'mock-admin-session-cookie' ? 'mock-admin-session-cookie' : 'mock-session-cookie';
     } else {
-      if (!adminAuth) {
-        return NextResponse.json({ error: 'Firebase Admin not initialized' }, { status: 500 });
-      }
-      sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+      // The idToken is already the Supabase access_token JWT
+      sessionCookie = idToken;
     }
 
     cookies().set('session', sessionCookie, {

@@ -506,7 +506,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         </div>
 
         {/* Footer Powered By */}
-        {business.plan !== 'agency' && (
+        {business.plan !== 'growth' && (
           <div className="py-3 bg-slate-50 border-t border-slate-100 text-center">
             <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">
               Powered by ReviewBoost

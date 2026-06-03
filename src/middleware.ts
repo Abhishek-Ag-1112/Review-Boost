@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   // For admin routes, verify admin session
   if (isAdminRoute || isAdminLoginRoute) {
     const sessionCookie = request.cookies.get('session')?.value;
-    const isMock = !process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes('your-firebase');
+    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project');
     
     let isUserAdmin = false;
 
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
     const sessionCookie = request.cookies.get('session')?.value;
     
     // Check if we are running in mock mode
-    const isMock = !process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes('your-firebase');
+    const isMock = !process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project');
     
     let isUserAuthenticated = false;
 

@@ -18,7 +18,8 @@ import {
   Store,
   ChevronDown,
   Lock,
-  ExternalLink
+  ExternalLink,
+  MessageCircle
 } from 'lucide-react';
 import { getFirstBusinessForOwner, Business } from '@/lib/db';
 
@@ -68,12 +69,12 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   };
 
   const planLabels: Record<string, { label: string; style: string }> = {
-    trial: { label: 'Free Trial', style: 'bg-amber-50 text-amber-700 border-amber-100' },
+    free: { label: 'Free Plan', style: 'bg-amber-50 text-amber-700 border-amber-100' },
     starter: { label: 'Starter', style: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
     growth: { label: 'Growth', style: 'bg-indigo-50 text-indigo-700 border-indigo-100' }
   };
 
-  const planDetails = business ? (planLabels[business.plan] || planLabels.trial) : planLabels.trial;
+  const planDetails = business ? (planLabels[business.plan] || planLabels.free) : planLabels.free;
 
   // Sidebar Links
   const navItems = [
@@ -140,9 +141,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
                   <Icon className={`w-4.5 h-4.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                   <span>{item.name}</span>
                 </div>
-                {item.gated && (
-                  <Lock className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'text-slate-350'}`} />
-                )}
+
               </Link>
             );
           })}
@@ -161,8 +160,9 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   );
 
   // Checks for suspension
-  let suspensionView: React.ReactNode = null;
   let dueSoonBanner: React.ReactNode = null;
+  let readOnlyWarningBanner: React.ReactNode = null;
+  let suspensionView: React.ReactNode = null;
 
   if (business) {
     const isSuspended = business.payment_status === 'unpaid' && business.payment_due_date && (new Date() > new Date(new Date(business.payment_due_date).setHours(23, 59, 59, 999)));
@@ -170,62 +170,86 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
     if (isDeactivated) {
       suspensionView = (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 w-full">
-          <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-100 shadow-xl flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-6">
-              <Lock className="w-8 h-8 shrink-0" />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-200 shadow-2xl flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-6">
+              <Lock className="w-8 h-8 shrink-0 animate-bounce" />
             </div>
-            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-red-50 border border-red-100 text-red-700 uppercase tracking-widest">
-              Account Deactive
+            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-100 text-rose-700 uppercase tracking-widest">
+              Account Suspended
             </span>
-            <h2 className="text-xl font-black text-slate-900 tracking-tight mt-4">
-              Account Deactivated
-            </h2>
-            <p className="text-xs font-semibold text-slate-500 mt-2 leading-relaxed">
-              This account is deactivated. For activation, please choose a plan or contact ReviewBoost.
+            <h3 className="text-xl font-black text-slate-900 tracking-tight mt-4">
+              Your Account is Inactive
+            </h3>
+            <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
+              This business review portal has been suspended or deactivated. For activation, please choose a plan or contact Review-Boost support.
             </p>
-            <div className="w-full border-t border-slate-100 my-6 pt-6 flex flex-col gap-3">
+            <div className="mt-8 w-full space-y-3">
               <Link
                 href={`/${locale}/dashboard/billing`}
-                className="w-full inline-block bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-6 rounded-2xl font-bold text-xs transition-colors text-center shadow-md shadow-emerald-100"
+                className="w-full inline-block bg-slate-900 hover:bg-slate-800 text-white font-black py-3.5 px-6 rounded-2xl text-xs transition-colors shadow-md text-center"
               >
                 Choose a Plan
               </Link>
               <a
-                href="mailto:support@reviewboost.com?subject=Account%20Reactivation"
-                className="w-full inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 py-3 px-6 rounded-2xl font-bold text-xs transition-colors text-center border border-slate-200"
+                href="https://wa.me/+919876543210?text=Hello%20Support,%20my%20ReviewBoost%20account%20has%20been%20suspended.%20Please%20help%20reactivate%20it."
+                target="_blank"
+                rel="noreferrer"
+                className="w-full inline-flex items-center justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-extrabold py-3 px-6 rounded-2xl text-xs gap-2 transition-all shadow-sm"
               >
-                Contact ReviewBoost
+                <MessageCircle className="w-4 h-4 text-emerald-600 fill-emerald-50" />
+                <span>Contact Review-Boost Support</span>
               </a>
+              <button
+                onClick={handleLogout}
+                className="w-full mt-4 text-xs font-bold text-red-500 hover:text-red-700 transition-colors py-2"
+              >
+                Log Out
+              </button>
             </div>
           </div>
         </div>
       );
-    } else if (isSuspended) {
-      suspensionView = (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 w-full">
-          <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-100 shadow-xl flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-6">
-              <Lock className="w-8 h-8 shrink-0" />
-            </div>
-            <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-red-50 border border-red-100 text-red-700 uppercase tracking-widest">
-              Payment Overdue
-            </span>
-            <h2 className="text-xl font-black text-slate-900 tracking-tight mt-4">
-              Subscription Overdue
-            </h2>
-            <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
-              Your manual subscription renewal of ₹{business.payment_amount || 0} is overdue (Due: {business.payment_due_date}). Please clear your dues to restore access.
-            </p>
-            <div className="w-full border-t border-slate-100 my-6 pt-6">
-              <Link
-                href={`/${locale}/dashboard/billing`}
-                className="w-full inline-block bg-slate-900 hover:bg-slate-800 text-white py-3 px-6 rounded-2xl font-bold text-xs transition-colors text-center"
-              >
-                Go to Billing Panel
-              </Link>
+    }
+
+    if (isDeactivated || business.trial_ended) {
+      readOnlyWarningBanner = (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-red-800 animate-pulse">
+          <div className="flex items-center gap-2.5">
+            <Lock className="w-5 h-5 shrink-0 text-red-650" />
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider block text-red-950">Read-Only Mode Active</span>
+              <p className="text-[11px] font-semibold text-red-750 mt-0.5">
+                Your ReviewBoost portal is currently suspended or deactivated. Public QR routes are paused and modifications are locked.
+              </p>
             </div>
           </div>
+          <Link
+            href={`/${locale}/dashboard/billing`}
+            className="shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-colors shadow-sm text-center"
+          >
+            Upgrade Plan & Reactivate
+          </Link>
+        </div>
+      );
+    } else if (isSuspended) {
+      readOnlyWarningBanner = (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-red-800 animate-pulse">
+          <div className="flex items-center gap-2.5">
+            <Lock className="w-5 h-5 shrink-0 text-red-650" />
+            <div>
+              <span className="text-xs font-black uppercase tracking-wider block text-red-950">Subscription Overdue</span>
+              <p className="text-[11px] font-semibold text-red-750 mt-0.5">
+                Your manual renewal of ₹{business.payment_amount || 0} is overdue (Due: {business.payment_due_date}).
+              </p>
+            </div>
+          </div>
+          <Link
+            href={`/${locale}/dashboard/billing`}
+            className="shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-colors shadow-sm text-center"
+          >
+            Clear Dues
+          </Link>
         </div>
       );
     } else {
@@ -270,16 +294,16 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   let trialBanner: React.ReactNode = null;
   let trialExpiredBanner: React.ReactNode = null;
 
-  if (business && business.plan === 'trial') {
+  if (business && business.plan === 'free') {
     if (business.trial_ended) {
       trialExpiredBanner = (
         <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-rose-800">
           <div className="flex items-center gap-2.5">
             <Lock className="w-5 h-5 shrink-0 text-rose-600" />
             <div>
-              <span className="text-xs font-black uppercase tracking-wider block text-rose-800">Trial Period Expired</span>
+              <span className="text-xs font-black uppercase tracking-wider block text-rose-800">Free Plan Expired</span>
               <p className="text-[11px] font-semibold text-rose-700 mt-0.5">
-                Your 30-day free trial has expired and your public QR funnel is currently paused. Choose a plan to keep your reviews flowing.
+                Your 30-day free plan period has expired and your public QR funnel is currently paused. Choose a plan to keep your reviews flowing.
               </p>
             </div>
           </div>
@@ -305,7 +329,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             <div>
               <span className="text-xs font-black uppercase tracking-wider block text-emerald-800">{remainingDays} days remaining in free trial</span>
               <p className="text-[11px] font-semibold text-emerald-700 mt-0.5">
-                You are on the 30-day Free Trial with all <strong>Growth</strong> features fully unlocked. Choose a plan to continue seamlessly.
+                You are on the 30-day Free Plan with all <strong>Growth</strong> features fully unlocked. Choose a plan to continue seamlessly.
               </p>
             </div>
           </div>
@@ -402,11 +426,12 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
           {dueSoonBanner}
           {trialBanner}
           {trialExpiredBanner}
+          {readOnlyWarningBanner}
 
           <div className="relative">
             {children}
             
-            {business?.trial_ended && (pathname.includes('/reviews') || pathname.includes('/qr') || pathname.includes('/analytics') || pathname.includes('/locations') || pathname.includes('/nfc') || pathname.includes('/settings')) && (
+            {(business?.trial_ended || !business?.is_active) && (pathname.includes('/reviews') || pathname.includes('/qr') || pathname.includes('/analytics') || pathname.includes('/locations') || pathname.includes('/nfc') || pathname.includes('/settings')) && (
               <div className="absolute inset-0 bg-slate-50/70 backdrop-blur-[2px] z-50 rounded-2xl flex items-center justify-center p-6 min-h-[400px]">
                 <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-150 shadow-2xl flex flex-col items-center text-center my-12">
                   <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-6">
@@ -418,8 +443,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
                   <h3 className="text-lg font-black text-slate-800 tracking-tight mt-4">
                     Dashboard is Read-Only
                   </h3>
-                  <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
-                    Your 30-day Free Trial has ended. Your public QR pages are paused, and dashboard editing is locked. Choose a plan to restore full access.
+                  <p className="text-xs font-semibold text-slate-405 mt-2 leading-relaxed">
+                    Your portal is currently deactivated or the trial has ended. Your public QR pages are paused, and dashboard editing is locked. Choose a plan to restore full access.
                   </p>
                   <Link
                     href={`/${locale}/dashboard/billing`}

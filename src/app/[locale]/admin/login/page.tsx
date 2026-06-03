@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient, isMockMode } from '@/lib/supabase';
-import { isFirebaseMock, auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Mail, Lock, LogIn, ShieldAlert, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function AdminLoginPage({ params }: { params: { locale: string } }) {
@@ -28,8 +26,8 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
     setError('');
     setSuccess('');
 
-    // Fallback to mock mode if either Supabase or Firebase is unconfigured
-    const isMock = isMockMode || isFirebaseMock;
+    // Fallback to mock mode if Supabase is unconfigured
+    const isMock = isMockMode;
 
     if (isMock) {
       // Mock admin auth bypass for local sandbox demo
@@ -45,9 +43,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
     }
 
     try {
-      if (!auth) {
-        throw new Error('Firebase Auth client not initialized');
-      }
+      const supabase = createClient();
 
       // Check client-side first if the email matches the authorized admin email
       const authorizedAdminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@reviewboost.com';
@@ -55,10 +51,18 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
         throw new Error('Unauthorized. Access is restricted to system administrators only.');
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (signInError) throw signInError;
+
+      const session = data.session;
+      if (!session) {
+        throw new Error('Failed to establish admin session.');
+      }
       
-      const idToken = await user.getIdToken();
+      const idToken = session.access_token;
       const res = await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,9 +78,6 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred during administrator authentication.');
-      if (auth && auth.currentUser) {
-        await auth.signOut();
-      }
     } finally {
       setLoading(false);
     }
@@ -204,7 +205,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
           </form>
 
           {/* Dev mock convenience button */}
-          {(isMockMode || isFirebaseMock) && (
+          {isMockMode && (
             <div className="mt-8 p-4 bg-slate-850/50 border border-slate-800 rounded-2xl">
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Dev Helper (Mock Mode)</p>
               <p className="text-xs text-slate-400 mb-3 leading-relaxed">

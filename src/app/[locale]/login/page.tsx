@@ -3,12 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { createClient, isMockMode } from '@/lib/supabase';
-import { isFirebaseMock, auth } from '@/lib/firebase';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  updateProfile 
-} from 'firebase/auth';
 import { Mail, Lock, LogIn, ArrowRight, UserPlus, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function LoginPage({ params }: { params: { locale: string } }) {
@@ -35,8 +29,8 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
     setError('');
     setSuccess('');
 
-    // Fallback to mock mode if either Supabase or Firebase is unconfigured
-    const isMock = isMockMode || isFirebaseMock;
+    // Fallback to mock mode if Supabase is unconfigured
+    const isMock = isMockMode;
 
     if (isMock) {
       // Mock auth bypass for local sandbox demo
@@ -52,16 +46,26 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
     }
 
     try {
-      if (!auth) {
-        throw new Error('Firebase Auth client not initialized');
-      }
+      const supabase = createClient();
 
       if (isSignUp) {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await updateProfile(user, { displayName: name });
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: name
+            }
+          }
+        });
+        if (signUpError) throw signUpError;
         
-        const idToken = await user.getIdToken();
+        const session = data.session;
+        if (!session) {
+          throw new Error('Account created! Please check your email for a verification link to activate your account.');
+        }
+        
+        const idToken = session.access_token;
         const res = await fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -73,10 +77,18 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
         setSuccess('Account created successfully!');
         window.location.href = `/${locale}/onboarding`;
       } else {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if (signInError) throw signInError;
         
-        const idToken = await user.getIdToken();
+        const session = data.session;
+        if (!session) {
+          throw new Error('Failed to establish session.');
+        }
+        
+        const idToken = session.access_token;
         const res = await fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
