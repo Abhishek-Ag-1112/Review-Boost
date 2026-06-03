@@ -127,11 +127,11 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
     <Document>
       <Page 
         size={isCard ? [240, 160] : (isA5 ? 'A5' : 'A4')} 
-        style={[styles.page, isCard && { padding: 10 }]}
+        style={[styles.page, ...(isCard ? [{ padding: 10 }] : [])]}
       >
-        <View style={[styles.cardContainer, isCard && { paddingVertical: 14, paddingHorizontal: 12, borderRadius: 16 }]}>
+        <View style={[styles.cardContainer, ...(isCard ? [{ paddingVertical: 14, paddingHorizontal: 12, borderRadius: 16 }] : [])]}>
           {/* Top colored accent bar */}
-          <View style={[styles.topAccent, { backgroundColor: brandColor || '#059669' }, isCard && { height: 6, borderTopLeftRadius: 14, borderTopRightRadius: 14 }]} />
+          <View style={[styles.topAccent, { backgroundColor: brandColor || '#059669' }, ...(isCard ? [{ height: 6, borderTopLeftRadius: 14, borderTopRightRadius: 14 }] : [])]} />
 
           {/* Header Block */}
           <View style={styles.headerBlock}>
@@ -159,7 +159,7 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
           </View>
 
           {/* QR Code Container Wrapper */}
-          <View style={[styles.qrWrapper, isCard && { padding: 8, borderRadius: 10 }, { width: qrSize + (isCard ? 16 : 32), height: qrSize + (isCard ? 16 : 32) }]}>
+          <View style={[styles.qrWrapper, ...(isCard ? [{ padding: 8, borderRadius: 10 }] : []), { width: qrSize + (isCard ? 16 : 32), height: qrSize + (isCard ? 16 : 32) }]}>
             <Image 
               src={qrDataUrl} 
               style={{ width: qrSize, height: qrSize }} 
@@ -190,10 +190,10 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
               </View>
             )}
 
-            <Text style={[styles.subCta, isCard && { fontSize: 5, letterSpacing: 1, marginBottom: 2 }]}>
+            <Text style={[styles.subCta, ...(isCard ? [{ fontSize: 5, letterSpacing: 1, marginBottom: 2 }] : [])]}>
               We value your honest feedback
             </Text>
-            <Text style={[styles.branding, isCard && { fontSize: 4 }]}>
+            <Text style={[styles.branding, ...(isCard ? [{ fontSize: 4 }] : [])]}>
               Powered by ReviewBoost
             </Text>
           </View>
