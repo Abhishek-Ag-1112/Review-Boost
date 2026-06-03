@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Document, Page, Text, View, Image, StyleSheet, pdf } from '@react-pdf/renderer';
+import React from 'react';
+
+// Vercel Serverless Function Config — increase limits for PDF generation
+export const maxDuration = 30; // seconds
+export const dynamic = 'force-dynamic';
 
 // Premium Elegant PDF Styles using built-in Helvetica (100% robust, 0 network dependencies)
 const styles = StyleSheet.create({
@@ -251,8 +256,11 @@ export async function POST(request: NextRequest) {
         'Content-Disposition': `attachment; filename="${businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${size}-standee.pdf"`
       }
     });
-  } catch (error) {
-    console.error('PDF Generation Error:', error);
-    return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 });
+  } catch (error: any) {
+    console.error('PDF Generation Error:', error?.message || error, error?.stack);
+    return NextResponse.json({ 
+      error: 'Failed to generate PDF', 
+      detail: error?.message || 'Unknown error'
+    }, { status: 500 });
   }
 }

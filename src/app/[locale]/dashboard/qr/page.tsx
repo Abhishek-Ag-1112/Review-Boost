@@ -137,11 +137,13 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
         link.click();
         URL.revokeObjectURL(fileURL);
       } else {
-        alert('Failed to generate PDF standee.');
+        const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('PDF generation failed:', errData);
+        alert(`Failed to generate PDF: ${errData.detail || errData.error || 'Server error'}`);
       }
-    } catch (e) {
-      console.error(e);
-      alert('Error fetching print PDF from server.');
+    } catch (e: any) {
+      console.error('PDF fetch error:', e);
+      alert(`Error fetching print PDF: ${e?.message || 'Network error'}`);
     } finally {
       setDownloadingPdf(null);
     }

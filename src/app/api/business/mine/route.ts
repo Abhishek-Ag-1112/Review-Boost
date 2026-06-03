@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
     const data = await getFirstBusinessForOwner(uid);
 
     if (!data) {
-      // It's normal to return null if they are still onboarding and haven't created a business yet
-      return NextResponse.json(null);
+      // No business found for this user - they need to onboard
+      return NextResponse.json(null, { status: 404 });
     }
 
     return NextResponse.json(data);

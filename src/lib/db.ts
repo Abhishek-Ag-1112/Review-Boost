@@ -37,6 +37,14 @@ async function fetchClientDashboardData() {
 let clientBusinessCache: any = null;
 let clientBusinessPromise: Promise<any> | null = null;
 
+// Call this to force a fresh fetch on next getFirstBusinessForOwner call
+export function invalidateBusinessCache() {
+  clientBusinessCache = null;
+  clientBusinessPromise = null;
+  clientDashboardDataCache = null;
+  clientDashboardDataPromise = null;
+}
+
 async function fetchClientBusiness() {
   if (typeof window === 'undefined') return null;
   if (clientBusinessCache) return clientBusinessCache;
@@ -48,7 +56,10 @@ async function fetchClientBusiness() {
       return res.json();
     })
     .then(data => {
-      clientBusinessCache = data;
+      // Only cache if we got real data (not null)
+      if (data && data.id) {
+        clientBusinessCache = data;
+      }
       clientBusinessPromise = null;
       return data;
     })

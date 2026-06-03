@@ -21,7 +21,7 @@ import {
   ExternalLink,
   MessageCircle
 } from 'lucide-react';
-import { getFirstBusinessForOwner, Business } from '@/lib/db';
+import { getFirstBusinessForOwner, invalidateBusinessCache, Business } from '@/lib/db';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -41,6 +41,9 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
   useEffect(() => {
     setMounted(true);
+
+    // Invalidate cache to always get fresh data (critical after plan upgrades)
+    invalidateBusinessCache();
 
     // Fetch merchant business
     getFirstBusinessForOwner('mock-owner')
