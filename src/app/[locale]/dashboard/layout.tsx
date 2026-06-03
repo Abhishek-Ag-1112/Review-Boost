@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  MessageSquare, 
-  QrCode, 
-  MapPin, 
-  Wifi, 
-  BarChart3, 
-  Settings, 
+import {
+  LayoutDashboard,
+  MessageSquare,
+  QrCode,
+  MapPin,
+  Wifi,
+  BarChart3,
+  Settings,
   CreditCard,
   LogOut,
   Menu,
@@ -33,7 +33,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, params }: DashboardLayoutProps) {
   const { locale } = params;
   const pathname = usePathname();
-  
+
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
   useEffect(() => {
     setMounted(true);
-    
+
     // Fetch merchant business
     getFirstBusinessForOwner('mock-owner')
       .then(b => {
@@ -56,7 +56,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
         console.error('Failed to get business:', err);
         setLoading(false);
       });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
   if (!mounted) return null;
 
@@ -127,7 +128,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             const localizedHref = `/${locale}${item.href}`;
             // Extract path details: is it matching active segment?
             const isActive = pathname === localizedHref || (item.href !== '/dashboard' && pathname.startsWith(localizedHref));
-            
+
             const Icon = item.icon;
 
             return (
@@ -367,7 +368,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
           >
             <Menu className="w-6 h-6" />
           </button>
-          
+
           <div className="flex items-center gap-1.5">
             <div className="w-7.5 h-7.5 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
               R
@@ -382,7 +383,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
         {mobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 flex z-50">
             {/* Backdrop overlay */}
-            <div 
+            <div
               className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
               onClick={() => setMobileMenuOpen(false)}
             />
@@ -430,7 +431,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
           <div className="relative">
             {children}
-            
+
             {(business?.trial_ended || !business?.is_active) && (pathname.includes('/reviews') || pathname.includes('/qr') || pathname.includes('/analytics') || pathname.includes('/locations') || pathname.includes('/nfc') || pathname.includes('/settings')) && (
               <div className="absolute inset-0 bg-slate-50/70 backdrop-blur-[2px] z-50 rounded-2xl flex items-center justify-center p-6 min-h-[400px]">
                 <div className="max-w-md w-full bg-white p-8 rounded-3xl border border-slate-150 shadow-2xl flex flex-col items-center text-center my-12">

@@ -367,7 +367,7 @@ export default function BillingPage({ params }: BillingPageProps) {
       ) : (
         <div className="bg-indigo-50/30 border border-indigo-100 rounded-3xl p-6 text-center">
           <TrendingUp className="w-8 h-8 text-indigo-500 mx-auto mb-3" />
-          <h3 className="font-black text-slate-800 text-sm">You're on the highest plan!</h3>
+          <h3 className="font-black text-slate-800 text-sm">You&apos;re on the highest plan!</h3>
           <p className="text-xs font-semibold text-slate-400 mt-1">
             You have access to all ReviewBoost features. For enterprise or custom needs, contact support.
           </p>
