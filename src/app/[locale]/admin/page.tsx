@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getAllBusinesses, getReviewsInbox, getAllUpgradeRequests, updateUpgradeRequestStatus, Business, Review, UpgradeRequest } from '@/lib/db';
+import { getAllBusinesses, getReviewsInbox, Business, Review, UpgradeRequest } from '@/lib/db';
 import { 
   Building2, 
   ShieldAlert, 
@@ -78,9 +78,18 @@ export default function AdminControlPanel({ params }: { params: { locale: string
       const combined = reviewResults.flat();
       setAllReviews(combined);
 
-      // Load upgrade requests
-      const reqs = await getAllUpgradeRequests();
-      setUpgradeRequests(reqs);
+      // Load upgrade requests via API (server-side uses service_role, bypasses RLS)
+      try {
+        const reqsRes = await fetch('/api/upgrade-request');
+        if (reqsRes.ok) {
+          const reqs = await reqsRes.json();
+          setUpgradeRequests(reqs || []);
+        } else {
+          console.error('Failed to fetch upgrade requests:', reqsRes.status);
+        }
+      } catch (e) {
+        console.error('Error fetching upgrade requests:', e);
+      }
     } catch (err) {
       console.error('Failed to load admin data:', err);
     } finally {
@@ -877,26 +886,44 @@ export default function AdminControlPanel({ params }: { params: { locale: string
       });
 
       if (res.ok) {
-        // 2. Mark the request as approved
-        const updated = await updateUpgradeRequestStatus(req.id, 'approved');
-        if (updated) {
+        // 2. Mark the request as approved via API
+        const patchRes = await fetch('/api/upgrade-request', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: req.id, status: 'approved' })
+        });
+        if (patchRes.ok) {
           setUpgradeRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved' } : r));
           // Also update the business in local state
           setBusinesses(prev => prev.map(b => b.id === req.business_id ? { ...b, plan: req.requested_plan as any, is_active: true, trial_ended: false } : b));
+        } else {
+          alert('Plan updated but failed to mark request as approved.');
         }
       } else {
-        alert('Failed to update business plan.');
+        const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        alert(`Failed to update business plan: ${errData.error || 'Server error'}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert('Error approving upgrade request.');
+      alert(`Error approving upgrade request: ${e?.message || 'Network error'}`);
     }
   };
 
   const handleRejectUpgrade = async (req: UpgradeRequest) => {
-    const updated = await updateUpgradeRequestStatus(req.id, 'rejected');
-    if (updated) {
-      setUpgradeRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'rejected' } : r));
+    try {
+      const patchRes = await fetch('/api/upgrade-request', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: req.id, status: 'rejected' })
+      });
+      if (patchRes.ok) {
+        setUpgradeRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'rejected' } : r));
+      } else {
+        alert('Failed to reject request.');
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert(`Error rejecting request: ${e?.message || 'Network error'}`);
     }
   };
 
