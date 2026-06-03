@@ -577,17 +577,14 @@ export default function BusinessSettings({ params }: { params: { locale: string 
               <Lock className="w-8 h-8 text-slate-455 mb-3" />
               <h4 className="font-bold text-slate-800 text-xs">Developer API Gated</h4>
               <p className="text-[11px] text-slate-400 font-semibold mt-1 max-w-xs leading-normal">
-                Access tokens for querying reviews and scan statistics are available only on the Growth tier.
+                Access tokens for querying reviews and scan statistics are available only on the Growth tier. Contact the admin team to upgrade.
               </p>
-              <button
-                onClick={async () => {
-                  await handleSave('api_upgrade', { plan: 'growth' });
-                }}
-                disabled={savingSection === 'api_upgrade'}
-                className="mt-4 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-md hover:shadow-purple-100 cursor-pointer"
+              <a
+                href={`/${locale}/dashboard/billing`}
+                className="mt-4 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-md hover:shadow-purple-100 cursor-pointer inline-block"
               >
-                {savingSection === 'api_upgrade' ? 'Upgrading...' : 'Simulate Upgrade to Growth Plan'}
-              </button>
+                Contact for Upgrade
+              </a>
             </div>
           )}
         </section>

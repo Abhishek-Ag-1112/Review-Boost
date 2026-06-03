@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getAllBusinesses, getReviewsInbox, Business, Review } from '@/lib/db';
+import { getAllBusinesses, getReviewsInbox, getAllUpgradeRequests, updateUpgradeRequestStatus, Business, Review, UpgradeRequest } from '@/lib/db';
 import { 
   Building2, 
   ShieldAlert, 
@@ -29,11 +29,14 @@ import {
   Clock,
   MapPin,
   ExternalLink,
-  Check
+  Check,
+  ArrowUpRight,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
-type AdminTab = 'dashboard' | 'businesses' | 'reviews' | 'settings';
+type AdminTab = 'dashboard' | 'businesses' | 'reviews' | 'upgrade_requests' | 'settings';
 
 export default function AdminControlPanel({ params }: { params: { locale: string } }) {
   const { locale } = params;
@@ -42,6 +45,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
   const [loading, setLoading] = useState(true);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const [upgradeRequests, setUpgradeRequests] = useState<UpgradeRequest[]>([]);
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
 
   // Business management
@@ -73,6 +77,10 @@ export default function AdminControlPanel({ params }: { params: { locale: string
       const reviewResults = await Promise.all(reviewPromises);
       const combined = reviewResults.flat();
       setAllReviews(combined);
+
+      // Load upgrade requests
+      const reqs = await getAllUpgradeRequests();
+      setUpgradeRequests(reqs);
     } catch (err) {
       console.error('Failed to load admin data:', err);
     } finally {
@@ -847,6 +855,164 @@ export default function AdminControlPanel({ params }: { params: { locale: string
   );
 
   // ═══════════════════════════════════════════
+  //  TAB: UPGRADE REQUESTS
+  // ═══════════════════════════════════════════
+
+  const pendingUpgradeCount = upgradeRequests.filter(r => r.status === 'pending').length;
+
+  const handleApproveUpgrade = async (req: UpgradeRequest) => {
+    // 1. Update the business plan
+    try {
+      const res = await fetch('/api/business/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessId: req.business_id,
+          plan: req.requested_plan,
+          is_active: true,
+          trial_ended: false
+        })
+      });
+
+      if (res.ok) {
+        // 2. Mark the request as approved
+        const updated = await updateUpgradeRequestStatus(req.id, 'approved');
+        if (updated) {
+          setUpgradeRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved' } : r));
+          // Also update the business in local state
+          setBusinesses(prev => prev.map(b => b.id === req.business_id ? { ...b, plan: req.requested_plan as any, is_active: true, trial_ended: false } : b));
+        }
+      } else {
+        alert('Failed to update business plan.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error approving upgrade request.');
+    }
+  };
+
+  const handleRejectUpgrade = async (req: UpgradeRequest) => {
+    const updated = await updateUpgradeRequestStatus(req.id, 'rejected');
+    if (updated) {
+      setUpgradeRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'rejected' } : r));
+    }
+  };
+
+  const UpgradeRequestsTab = () => (
+    <div className="space-y-6">
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Pending</span>
+          <span className="text-2xl font-black text-amber-600">{upgradeRequests.filter(r => r.status === 'pending').length}</span>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Approved</span>
+          <span className="text-2xl font-black text-emerald-600">{upgradeRequests.filter(r => r.status === 'approved').length}</span>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Rejected</span>
+          <span className="text-2xl font-black text-rose-500">{upgradeRequests.filter(r => r.status === 'rejected').length}</span>
+        </div>
+      </div>
+
+      {/* Requests Table */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        {upgradeRequests.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/80">
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Merchant</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Plan</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Requested Plan</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {upgradeRequests.map((req) => (
+                  <tr key={req.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">
+                          {req.business_name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-bold text-slate-800 text-xs truncate max-w-[180px]">{req.business_name}</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${planBadge(req.current_plan)}`}>
+                        {req.current_plan.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${planBadge(req.requested_plan)}`}>
+                        {req.requested_plan.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <div className="space-y-0.5">
+                        {req.contact_email && <div className="text-[10px] font-bold text-slate-500 truncate max-w-[160px]">{req.contact_email}</div>}
+                        {req.contact_phone && <div className="text-[10px] font-bold text-slate-400">{req.contact_phone}</div>}
+                        {!req.contact_email && !req.contact_phone && <span className="text-[10px] text-slate-300">—</span>}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span className="text-[10px] font-bold text-slate-500">
+                        {new Date(req.created_at).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5">
+                      <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border ${
+                        req.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                        req.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                        'bg-rose-50 text-rose-600 border-rose-200'
+                      }`}>
+                        {req.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-5 text-right">
+                      {req.status === 'pending' ? (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleApproveUpgrade(req)}
+                            title="Approve and upgrade plan"
+                            className="p-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleRejectUpgrade(req)}
+                            title="Reject request"
+                            className="p-2 rounded-xl bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 transition-colors"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[9px] font-bold text-slate-400">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-16 px-6">
+            <ArrowUpRight className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+            <h3 className="font-bold text-slate-700 text-sm">No Upgrade Requests</h3>
+            <p className="text-[10px] text-slate-400 font-semibold mt-1">When merchants request plan upgrades, they will appear here.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════
   //  TAB NAVIGATION CONFIG
   // ═══════════════════════════════════════════
 
@@ -854,6 +1020,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'businesses', label: 'Businesses', icon: Building2 },
     { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+    { id: 'upgrade_requests', label: 'Upgrades', icon: ArrowUpRight },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -923,6 +1090,11 @@ export default function AdminControlPanel({ params }: { params: { locale: string
                       {unresolvedCount}
                     </span>
                   )}
+                  {tab.id === 'upgrade_requests' && pendingUpgradeCount > 0 && (
+                    <span className="text-[8px] font-black bg-indigo-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                      {pendingUpgradeCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -935,6 +1107,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'businesses' && <BusinessesTab />}
         {activeTab === 'reviews' && <ReviewsTab />}
+        {activeTab === 'upgrade_requests' && <UpgradeRequestsTab />}
         {activeTab === 'settings' && <SettingsTab />}
       </div>
     </div>

@@ -127,6 +127,21 @@ CREATE TABLE IF NOT EXISTS public.nfc_cards (
 );
 
 -- ============================================================
+-- 7. UPGRADE REQUESTS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.upgrade_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
+  business_name TEXT NOT NULL,
+  current_plan TEXT NOT NULL,
+  requested_plan TEXT NOT NULL CHECK (requested_plan IN ('starter', 'growth')),
+  contact_email TEXT,
+  contact_phone TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_businesses_slug ON public.businesses(slug);
@@ -138,6 +153,8 @@ CREATE INDEX IF NOT EXISTS idx_qr_scans_business ON public.qr_scans(business_id)
 CREATE INDEX IF NOT EXISTS idx_qr_scans_scanned ON public.qr_scans(scanned_at);
 CREATE INDEX IF NOT EXISTS idx_nfc_cards_uid ON public.nfc_cards(card_uid);
 CREATE INDEX IF NOT EXISTS idx_locations_business ON public.locations(business_id);
+CREATE INDEX IF NOT EXISTS idx_upgrade_requests_business ON public.upgrade_requests(business_id);
+CREATE INDEX IF NOT EXISTS idx_upgrade_requests_status ON public.upgrade_requests(status);
 
 -- ============================================================
 -- ROW LEVEL SECURITY (RLS)
@@ -148,6 +165,7 @@ ALTER TABLE public.qr_scans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.nfc_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.upgrade_requests ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies to allow clean re-execution
 DROP POLICY IF EXISTS "businesses_owner_read" ON public.businesses;
@@ -162,6 +180,8 @@ DROP POLICY IF EXISTS "scans_owner_read" ON public.qr_scans;
 DROP POLICY IF EXISTS "subscriptions_owner" ON public.subscriptions;
 DROP POLICY IF EXISTS "locations_owner" ON public.locations;
 DROP POLICY IF EXISTS "nfc_cards_owner" ON public.nfc_cards;
+DROP POLICY IF EXISTS "upgrade_requests_insert" ON public.upgrade_requests;
+DROP POLICY IF EXISTS "upgrade_requests_admin" ON public.upgrade_requests;
 
 -- Admin check function (security definer — bypasses RLS)
 CREATE OR REPLACE FUNCTION public.is_admin()
@@ -233,6 +253,16 @@ CREATE POLICY "nfc_cards_owner" ON public.nfc_cards
     business_id IN (SELECT id FROM public.businesses WHERE owner_id = auth.uid()::text)
     OR public.is_admin()
   );
+
+-- Upgrade Requests: merchants can insert, admins can manage all
+CREATE POLICY "upgrade_requests_insert" ON public.upgrade_requests
+  FOR INSERT WITH CHECK (
+    business_id IN (SELECT id FROM public.businesses WHERE owner_id = auth.uid()::text)
+    OR public.is_admin()
+  );
+
+CREATE POLICY "upgrade_requests_admin" ON public.upgrade_requests
+  FOR ALL USING (public.is_admin());
 
 -- ============================================================
 -- MERCHANT FIELD RESTRICTION TRIGGER

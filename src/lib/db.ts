@@ -1275,9 +1275,112 @@ export async function getAllBusinesses(): Promise<Business[]> {
   return data as Business[];
 }
 
+// ============================================================
+// UPGRADE REQUESTS
+// ============================================================
 
+export interface UpgradeRequest {
+  id: string;
+  business_id: string;
+  business_name: string;
+  current_plan: string;
+  requested_plan: 'starter' | 'growth';
+  contact_email: string | null;
+  contact_phone: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
 
+// In-memory mock store for upgrade requests
+const mockUpgradeRequests: UpgradeRequest[] = [];
 
+export async function createUpgradeRequest(data: {
+  business_id: string;
+  business_name: string;
+  current_plan: string;
+  requested_plan: 'starter' | 'growth';
+  contact_email?: string | null;
+  contact_phone?: string | null;
+}): Promise<UpgradeRequest | null> {
+  const newRequest: UpgradeRequest = {
+    id: `ur-${Math.random().toString(36).substring(2, 11)}`,
+    business_id: data.business_id,
+    business_name: data.business_name,
+    current_plan: data.current_plan,
+    requested_plan: data.requested_plan,
+    contact_email: data.contact_email || null,
+    contact_phone: data.contact_phone || null,
+    status: 'pending',
+    created_at: new Date().toISOString()
+  };
+
+  if (isMockMode) {
+    mockUpgradeRequests.unshift(newRequest);
+    return newRequest;
+  }
+
+  const supabase = getSupabaseClient();
+  const insertPayload = { ...newRequest };
+  delete (insertPayload as any).id;
+
+  const { data: inserted, error } = await supabase
+    .from('upgrade_requests')
+    .insert(insertPayload)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating upgrade request:', error);
+    return null;
+  }
+  return inserted as UpgradeRequest;
+}
+
+export async function getAllUpgradeRequests(): Promise<UpgradeRequest[]> {
+  if (isMockMode) {
+    return [...mockUpgradeRequests];
+  }
+
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('upgrade_requests')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching upgrade requests:', error);
+    return [];
+  }
+  return data as UpgradeRequest[];
+}
+
+export async function updateUpgradeRequestStatus(
+  id: string,
+  status: 'approved' | 'rejected'
+): Promise<UpgradeRequest | null> {
+  if (isMockMode) {
+    const idx = mockUpgradeRequests.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      mockUpgradeRequests[idx].status = status;
+      return mockUpgradeRequests[idx];
+    }
+    return null;
+  }
+
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('upgrade_requests')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating upgrade request:', error);
+    return null;
+  }
+  return data as UpgradeRequest;
+}
 
 
 
