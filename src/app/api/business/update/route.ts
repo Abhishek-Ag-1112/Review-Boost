@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
     const updated = await updateBusinessSettings(businessId, settings);
 
     if (!updated) {
-      return NextResponse.json({ error: 'Failed to update business settings' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to update business settings. Check server logs for Supabase errors.' }, { status: 500 });
     }
 
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Business settings update error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Internal Server Error' }, { status: 500 });
   }
 }

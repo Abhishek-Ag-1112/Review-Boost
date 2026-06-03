@@ -256,8 +256,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
           </Link>
         </div>
       );
-    } else {
-      // Check due soon warning banner
+    } else if (business.payment_status !== 'paid') {
+      // Check due soon warning banner — only when NOT paid
       const isDueSoon = business.payment_status === 'due_soon';
       let isWithin7Days = false;
       if (business.payment_due_date) {

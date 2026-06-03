@@ -184,16 +184,41 @@ DROP POLICY IF EXISTS "upgrade_requests_insert" ON public.upgrade_requests;
 DROP POLICY IF EXISTS "upgrade_requests_admin" ON public.upgrade_requests;
 
 -- Admin check function (security definer — bypasses RLS)
+-- Detects service_role key connections AND admin email from JWT
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  jwt_role TEXT;
 BEGIN
-  RETURN (
-    current_setting('request.jwt.claims', true)::json->>'role' = 'service_role'
-    OR current_setting('request.jwt.claims', true)::json->>'email' = current_setting('app.admin_email', true)
-  );
+  -- Method 1: Check if using service_role key (server-side admin calls)
+  -- Service role connections set the postgres role to 'service_role'
+  IF current_setting('role', true) = 'service_role' THEN
+    RETURN true;
+  END IF;
+
+  -- Method 2: Check JWT claims for service_role
+  BEGIN
+    jwt_role := current_setting('request.jwt.claims', true)::json->>'role';
+    IF jwt_role = 'service_role' THEN
+      RETURN true;
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    -- No JWT claims set, continue
+  END;
+
+  -- Method 3: Check JWT email against admin email
+  BEGIN
+    IF current_setting('request.jwt.claims', true)::json->>'email' = current_setting('app.admin_email', true) THEN
+      RETURN true;
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    -- No JWT claims set
+  END;
+
+  RETURN false;
 END;
 $$;
 

@@ -130,11 +130,13 @@ export default function AdminControlPanel({ params }: { params: { locale: string
         setSuccessId(id);
         setTimeout(() => setSuccessId(null), 2500);
       } else {
-        alert('Failed to save changes.');
+        const errData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Save failed:', errData);
+        alert(`Failed to save: ${errData.error || 'Server error'}`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert('Internal error saving changes.');
+      alert(`Internal error: ${e?.message || 'Network error'}`);
     } finally {
       setSavingId(null);
     }
