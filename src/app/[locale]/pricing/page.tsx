@@ -19,7 +19,7 @@ export default function PricingPage({ params }: PricingPageProps) {
   const faqItems = [
     {
       q: "What is your cancellation policy?",
-      a: "Review-Boost has no long-term contracts. You can cancel your subscription renewal at any time. Simply contact the support admin or pause your manual renewal, and your account will gracefully transition to the inactive status without any exit fees or penalties."
+      a: "ReviewPe has no long-term contracts. You can cancel your subscription renewal at any time. Simply contact the support admin or pause your manual renewal, and your account will gracefully transition to the inactive status without any exit fees or penalties."
     },
     {
       q: "Can I switch between plans?",
@@ -50,7 +50,7 @@ export default function PricingPage({ params }: PricingPageProps) {
     { name: "Email + WhatsApp Alerts", starter: true, growth: true }
   ];
 
-  const supportEmail = 'billing@reviewboost.com';
+  const supportEmail = 'billing@reviewpe.online';
   const supportPhone = '+919876543210';
   const starterText = "Hello Support, I would like to subscribe to the Starter Plan (₹399/mo) after my free plan period.";
   const growthText = "Hello Support, I would like to subscribe to the Growth Plan (₹799/mo) after my free plan period.";
@@ -73,10 +73,8 @@ export default function PricingPage({ params }: PricingPageProps) {
             <span>Back to Home</span>
           </Link>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold shadow-sm transition-transform hover:scale-105 duration-200">
-              R
-            </div>
-            <span className="font-extrabold text-slate-900 tracking-tight text-base">Review<span className="text-emerald-600">Boost</span></span>
+            <img src="/icon.png" alt="ReviewPe Icon" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
+            <span className="font-extrabold text-slate-900 tracking-tight text-base">Review<span className="text-emerald-600">Pe</span></span>
           </div>
         </div>
       </header>
@@ -368,7 +366,7 @@ export default function PricingPage({ params }: PricingPageProps) {
 
       {/* Footer Branding */}
       <footer className="text-center pt-20 pb-4 text-[10px] font-bold text-slate-400">
-        <p>© {new Date().getFullYear()} Review-Boost. All Rights Reserved. Indian local business assistance.</p>
+        <p>© {new Date().getFullYear()} ReviewPe. All Rights Reserved. Indian local business assistance.</p>
       </footer>
     </div>
   );

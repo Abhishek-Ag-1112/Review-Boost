@@ -199,7 +199,7 @@ const PrintTemplate = ({ qrDataUrl, businessName, tagline, brandColor, size, log
               We value your honest feedback
             </Text>
             <Text style={[styles.branding, ...(isCard ? [{ fontSize: 4 }] : [])]}>
-              Powered by ReviewBoost
+              Powered by ReviewPe
             </Text>
           </View>
         </View>

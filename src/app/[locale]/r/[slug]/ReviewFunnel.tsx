@@ -113,7 +113,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
           stars: selectedStars,
           category: business.category,
           business_name: business.name,
-          language: currentLocale
+          language: currentLocale,
+          business_id: business.id
         })
       });
       const data = await response.json();
@@ -267,7 +268,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         {/* Header bar with Language Toggle */}
         <div className="flex justify-between items-center px-6 py-4 bg-slate-50 border-b border-slate-100">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            ReviewBoost Funnel
+            ReviewPe Funnel
           </span>
           {/* Language selector toggle */}
           {business.plan !== 'free' && (
@@ -509,7 +510,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         {business.plan !== 'growth' && (
           <div className="py-3 bg-slate-50 border-t border-slate-100 text-center">
             <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">
-              Powered by ReviewBoost
+              Powered by ReviewPe
             </span>
           </div>
         )}

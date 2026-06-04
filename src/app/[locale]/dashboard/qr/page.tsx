@@ -54,7 +54,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
   if (!business) return null;
 
   // Determine review page URL
-  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://reviewboost.com';
+  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://reviewpe.online';
   const reviewUrl = `${appUrl}/r/${business.slug}`;
 
   // Copy URL to Clipboard

@@ -90,6 +90,18 @@ export interface Business {
   whatsapp_number: string | null;
   notification_email: string | null;
   nfc_enabled: boolean;
+  vibe?: string | null;
+  theme?: string | null;
+  ambiance?: string | null;
+  staff_highlights?: string | null;
+  specialties?: string | null;
+  brand_values?: string | null;
+  review_tone?: string | null;
+  target_keywords?: string | null;
+  avoid_phrases?: string | null;
+  ai_suggestions_4_star?: string[] | null;
+  ai_suggestions_5_star?: string[] | null;
+  ai_suggestions_updated_at?: string | null;
   api_key?: string | null;
   payment_due_date?: string | null;
   payment_amount?: number | null;
@@ -114,177 +126,10 @@ export interface Review {
   created_at: string;
 }
 
-// In-memory mock store for local demo/testing
-const mockBusinesses: Record<string, Business> = {
-  'chai-point-jaipur-a3f2': {
-    id: 'b1111111-1111-1111-1111-111111111111',
-    owner_id: 'u0000000-0000-0000-0000-000000000000',
-    name: 'Chai Point Jaipur',
-    slug: 'chai-point-jaipur-a3f2',
-    google_place_id: 'ChIJ-x9F2u2zZTkR082K2x2W3lE',
-    google_review_url: 'https://search.google.com/local/writereview?placeid=ChIJ-x9F2u2zZTkR082K2x2W3lE',
-    logo_url: 'https://images.unsplash.com/photo-1593967858208-67ddb5b4cfee?w=128&h=128&fit=crop',
-    brand_color: '#059669', // Emerald Green
-    tagline: 'How was your experience today?',
-    category: 'restaurant',
-    language: 'en',
-    plan: 'growth',
-    trial_started_at: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
-    trial_ended: false,
-    whatsapp_number: '+919876543210',
-    notification_email: 'jaipur@chaipoint.com',
-    nfc_enabled: true,
-    payment_due_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Due in 5 days
-    payment_amount: 799,
-    payment_status: 'due_soon',
-    is_active: true,
-    created_at: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  'tress-lounge-pune-8f2a': {
-    id: 'b2222222-2222-2222-2222-222222222222',
-    owner_id: 'u0000000-0000-0000-0000-000000000000',
-    name: 'Tress Lounge Pune',
-    slug: 'tress-lounge-pune-8f2a',
-    google_place_id: 'ChIJ577q_p_BwjsRn32H3t4sF2Q',
-    google_review_url: 'https://search.google.com/local/writereview?placeid=ChIJ577q_p_BwjsRn32H3t4sF2Q',
-    logo_url: null,
-    brand_color: '#d97706', // Amber Gold
-    tagline: 'Rate your styling experience!',
-    category: 'salon',
-    language: 'en',
-    plan: 'free',
-    trial_started_at: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(), // 26 days ago (4 days left)
-    trial_ended: false,
-    whatsapp_number: '+919999999999',
-    notification_email: 'pune@tresslounge.com',
-    nfc_enabled: false,
-    payment_due_date: null,
-    payment_amount: 0,
-    payment_status: 'paid',
-    is_active: true,
-    created_at: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  'pizza-hut-expired': {
-    id: 'b3333333-3333-3333-3333-333333333333',
-    owner_id: 'u0000000-0000-0000-0000-000000000000',
-    name: 'Pizza Hut Express',
-    slug: 'pizza-hut-expired',
-    google_place_id: 'ChIJ-pizza-place-id',
-    google_review_url: 'https://search.google.com/local/writereview?placeid=ChIJ-pizza-place-id',
-    logo_url: null,
-    brand_color: '#ef4444', // Red
-    tagline: 'Rate our fresh pizza slice!',
-    category: 'restaurant',
-    language: 'en',
-    plan: 'free',
-    trial_started_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(), // 35 days ago (expired)
-    trial_ended: true,
-    whatsapp_number: '+919999988888',
-    notification_email: 'pizza@hut.com',
-    nfc_enabled: false,
-    payment_due_date: null,
-    payment_amount: 0,
-    payment_status: 'unpaid',
-    is_active: false,
-    created_at: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString()
-  }
-};
-
-// Rich mockup reviews data
-const mockReviews: Review[] = [
-  {
-    id: 'rev-1',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 5,
-    is_public: true,
-    custom_text: 'Absolutely delicious masala chai and bun maska! The service is lightning fast and the staff is extremely polite. Highly recommended!',
-    ai_suggestion_used: 'The staff were helpful and the service was prompt.',
-    language_used: 'en',
-    is_resolved: false,
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-  },
-  {
-    id: 'rev-2',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 2,
-    is_public: false,
-    private_feedback: 'The tea was slightly cold, and the billing counter queue was too long. Took 15 minutes just to get a single kulhad chai.',
-    customer_name: 'Rahul Sharma',
-    customer_phone: '+919876543210',
-    language_used: 'en',
-    is_resolved: false,
-    owner_note: '',
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
-  },
-  {
-    id: 'rev-3',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 4,
-    is_public: true,
-    custom_text: 'बहुत ही बढ़िया चाय और समोसे! माहौल बहुत अच्छा था, शाम को बैठने के लिए बेहतरीन जगह है।',
-    ai_suggestion_used: 'कुल मिलाकर बहुत अच्छा अनुभव रहा, मैं निश्चित रूप से इसकी सिफारिश करूँगा।',
-    language_used: 'hi',
-    is_resolved: false,
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
-  },
-  {
-    id: 'rev-4',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 1,
-    is_public: false,
-    private_feedback: 'Extremely rude manager at the counter. Refused to accept UPI payment and was very dismissive when I asked for a bill.',
-    customer_name: 'Priyanka Patel',
-    customer_phone: '+919988776655',
-    language_used: 'en',
-    is_resolved: true,
-    owner_note: 'Called customer, offered free voucher, manager has been warned.',
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() // 5 days ago
-  },
-  {
-    id: 'rev-5',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 5,
-    is_public: true,
-    custom_text: 'Clean place, awesome filter coffee and quick service. Best value in the area!',
-    ai_suggestion_used: 'Good value for money, will be coming back.',
-    language_used: 'en',
-    is_resolved: false,
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days ago
-  },
-  {
-    id: 'rev-6',
-    business_id: 'b1111111-1111-1111-1111-111111111111',
-    stars: 3,
-    is_public: false,
-    private_feedback: 'The seating was uncomfortable and the music was too loud. Hard to have a conversation.',
-    customer_name: 'Amit Deshmukh',
-    customer_phone: '',
-    language_used: 'en',
-    is_resolved: false,
-    owner_note: 'Looking into sound absorption padding for tables.',
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() // 10 days ago
-  }
-];
-
-// Seeded mock scans history for charts
+// Cleaned up mock store for production deployment
+const mockBusinesses: Record<string, Business> = {};
+const mockReviews: Review[] = [];
 const mockScans: { scanned_at: string; scan_source: string }[] = [];
-
-// Populate 30 days of scan history
-const seedMockScans = () => {
-  const sources = ['qr', 'qr', 'nfc', 'link', 'whatsapp'];
-  const now = new Date();
-  for (let i = 0; i < 180; i++) {
-    const date = new Date();
-    date.setDate(now.getDate() - Math.floor(Math.random() * 30));
-    date.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
-    
-    mockScans.push({
-      scanned_at: date.toISOString(),
-      scan_source: sources[Math.floor(Math.random() * sources.length)]
-    });
-  }
-};
-seedMockScans();
 
 export async function getBusinessBySlug(slug: string): Promise<Business | null> {
   if (isMockMode) {

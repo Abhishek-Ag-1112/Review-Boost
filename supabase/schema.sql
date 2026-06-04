@@ -1,5 +1,5 @@
 -- ============================================================
--- ReviewBoost — Unified Database Schema
+-- ReviewPe — Unified Database Schema
 -- Plans: free | starter | growth
 -- ============================================================
 

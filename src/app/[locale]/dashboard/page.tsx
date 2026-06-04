@@ -149,7 +149,7 @@ export default function DashboardOverview({ params }: { params: { locale: string
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Overview</h1>
-          <p className="text-sm text-slate-500 font-semibold mt-1">Here is a snapshot of your ReviewBoost stats.</p>
+          <p className="text-sm text-slate-500 font-semibold mt-1">Here is a snapshot of your ReviewPe stats.</p>
         </div>
 
         {/* Date Filter Toggle */}

@@ -20,8 +20,8 @@ export async function verifyFirebaseSession(sessionCookie: string) {
       sessionCookie === 'mock-admin-session-cookie'
     ) {
       const email = sessionCookie === 'mock-admin-session-cookie'
-        ? (process.env.ADMIN_EMAIL || 'admin@reviewboost.com')
-        : 'merchant@reviewboost.com';
+        ? (process.env.ADMIN_EMAIL || 'admin@reviewpe.online')
+        : 'merchant@reviewpe.online';
       return { uid: 'mock-owner', email };
     }
     throw new Error('Invalid mock session cookie');

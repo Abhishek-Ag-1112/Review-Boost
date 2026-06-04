@@ -46,7 +46,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
       const supabase = createClient();
 
       // Check client-side first if the email matches the authorized admin email
-      const authorizedAdminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@reviewboost.com';
+      const authorizedAdminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@reviewpe.online';
       if (email.toLowerCase().trim() !== authorizedAdminEmail.toLowerCase().trim()) {
         throw new Error('Unauthorized. Access is restricted to system administrators only.');
       }
@@ -84,7 +84,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
   };
 
   const fillMockAdminCredentials = () => {
-    setEmail('admin@reviewboost.com');
+    setEmail('admin@reviewpe.online');
     setPassword('adminpassword123');
   };
 
@@ -97,10 +97,8 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-slate-900 rounded-full blur-3xl opacity-50 transform -translate-x-1/3 translate-y-1/3" />
 
         <div className="relative flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-indigo-650 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-indigo-500/20">
-            R
-          </div>
-          <span className="font-extrabold text-white text-2xl tracking-tight">ReviewBoost</span>
+          <img src="/icon.png" alt="ReviewPe Icon" className="w-9 h-9 object-contain rounded-xl bg-slate-800 p-1" />
+          <span className="font-extrabold text-white text-2xl tracking-tight">ReviewPe</span>
           <span className="text-[9px] font-black bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded uppercase tracking-wider ml-1">
             Console
           </span>
@@ -130,10 +128,8 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
           {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="md:hidden flex items-center justify-center gap-1.5 mb-6">
-              <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-extrabold text-sm">
-                R
-              </div>
-              <span className="font-extrabold text-white tracking-tight text-lg">ReviewBoost</span>
+              <img src="/icon.png" alt="ReviewPe Icon" className="w-7 h-7 object-contain rounded-lg" />
+              <span className="font-extrabold text-white tracking-tight text-lg">ReviewPe</span>
             </div>
 
             <h2 className="text-3xl font-extrabold text-white tracking-tight">
@@ -155,7 +151,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@reviewboost.com"
+                  placeholder="admin@reviewpe.online"
                   className="w-full text-sm pl-10 pr-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>

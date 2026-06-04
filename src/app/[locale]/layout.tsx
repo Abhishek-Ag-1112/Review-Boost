@@ -7,12 +7,12 @@ const inter = Inter({ subsets: ['latin'] });
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }) {
   const titles: Record<string, string> = {
-    en: 'ReviewBoost - Smart Google Review Funnel for Indian Businesses',
-    hi: 'ReviewBoost - भारतीय व्यवसायों के लिए स्मार्ट गूगल रिव्यू फ़नल',
-    mr: 'ReviewBoost - भारतीय व्यवसायांसाठी स्मार्ट गुगल रिव्ह्यू फनेल',
-    ta: 'ReviewBoost - இந்திய வணிகங்களுக்கான ஸ்மார்ட் கூகிள் விமர்சன ஃபனல்',
-    te: 'ReviewBoost - భారతీయ వ్యాపారాల కోసం స్మార్ట్ గూగుల్ రివ్యూ ఫన్నెల్',
-    kn: 'ReviewBoost - ಭಾರತೀಯ ಉದ್ಯಮಗಳಿಗಾಗಿ ಸ್ಮಾರ್ಟ್ ಗೂಗಲ್ ವಿಮರ್ಶೆ ಫನೆಲ್'
+    en: 'ReviewPe - Reviews that grow your business',
+    hi: 'ReviewPe - भारतीय व्यवसायों के लिए स्मार्ट गूगल रिव्यू फ़नल',
+    mr: 'ReviewPe - भारतीय व्यवसायांसाठी स्मार्ट गुगल रिव्ह्यू फनेल',
+    ta: 'ReviewPe - இந்திய வணிகங்களுக்கான ஸ்மார்ட் கூகிள் விமர்சன ஃபனல்',
+    te: 'ReviewPe - భారతీయ వ్యాపారాల కోసం స్మార్ట్ గూగుల్ రివ్యూ ఫన్నెల్',
+    kn: 'ReviewPe - ಭಾರತೀಯ ಉದ್ಯಮಗಳಿಗಾಗಿ ಸ್ಮಾರ್ಟ್ ಗೂಗಲ್ ವಿಮರ್ಶೆ ಫನೆಲ್'
   };
 
   const descriptions: Record<string, string> = {
@@ -27,6 +27,11 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   return {
     title: titles[locale] || titles.en,
     description: descriptions[locale] || descriptions.en,
+    icons: {
+      icon: '/icon.png',
+      shortcut: '/favicon.ico',
+      apple: '/icon.png',
+    }
   };
 }
 

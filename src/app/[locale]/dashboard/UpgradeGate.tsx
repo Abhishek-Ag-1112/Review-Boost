@@ -22,12 +22,12 @@ export default function UpgradeGate({
     growth: 'Growth Plan'
   };
 
-  const supportEmail = 'billing@reviewboost.com';
+  const supportEmail = 'billing@reviewpe.online';
   const supportPhone = '+919876543210'; // Support number
 
-  const messageText = `Hello ReviewBoost Support, I would like to manually upgrade my business "${businessName}" from the ${currentPlan} tier to the ${planTitles[planNeeded]}. Please coordinate the invoice and activation.`;
+  const messageText = `Hello ReviewPe Support, I would like to manually upgrade my business "${businessName}" from the ${currentPlan} tier to the ${planTitles[planNeeded]}. Please coordinate the invoice and activation.`;
   
-  const emailUrl = `mailto:${supportEmail}?subject=ReviewBoost%20Manual%20Upgrade%20Request&body=${encodeURIComponent(messageText)}`;
+  const emailUrl = `mailto:${supportEmail}?subject=ReviewPe%20Manual%20Upgrade%20Request&body=${encodeURIComponent(messageText)}`;
   const whatsappUrl = `https://wa.me/${supportPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(messageText)}`;
 
   return (

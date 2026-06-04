@@ -337,7 +337,7 @@ export default function LocationsPage({ params }: { params: { locale: string } }
                     Generated Funnel URL:
                   </span>
                   <div className="flex items-center gap-1 text-slate-700 font-mono text-[10px] font-bold overflow-x-auto whitespace-nowrap">
-                    <span>reviewboost.in/r/</span>
+                    <span>reviewpe.in/r/</span>
                     <span className="text-emerald-600 font-black">{customSlug}</span>
                   </div>
                 </div>

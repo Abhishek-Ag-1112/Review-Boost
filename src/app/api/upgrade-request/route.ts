@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     try {
       const decoded = await verifyFirebaseSession(sessionCookie);
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewboost.com';
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
       // Allow mock sessions and admin email
       const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
       const isAdmin = isMockAdmin || decoded.email === adminEmail;
@@ -89,7 +89,7 @@ export async function PATCH(request: NextRequest) {
 
     try {
       const decoded = await verifyFirebaseSession(sessionCookie);
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewboost.com';
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
       const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
       const isAdmin = isMockAdmin || decoded.email === adminEmail;
       if (!isAdmin) {

@@ -109,7 +109,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
   };
 
   const fillMockCredentials = () => {
-    setEmail('merchant@reviewboost.com');
+    setEmail('merchant@reviewpe.online');
     setPassword('password123');
     setName('Rajesh Kumar');
   };
@@ -123,10 +123,8 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-950 rounded-full blur-3xl opacity-60 transform -translate-x-1/3 translate-y-1/3" />
 
         <div className="relative flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-emerald-900 font-extrabold text-xl">
-            R
-          </div>
-          <span className="font-extrabold text-white text-2xl tracking-tight">ReviewBoost</span>
+          <img src="/icon.png" alt="ReviewPe Icon" className="w-9 h-9 object-contain rounded-xl bg-white p-1" />
+          <span className="font-extrabold text-white text-2xl tracking-tight">ReviewPe</span>
         </div>
 
         <div className="relative space-y-6 max-w-md">
@@ -138,7 +136,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
             Turn every happy customer into a Google review.
           </h1>
           <p className="text-emerald-100/80 leading-relaxed font-medium">
-            ReviewBoost helps restaurants, salons, clinics, and shops collect 10x more Google reviews while filtering negative complaints privately.
+            ReviewPe helps restaurants, salons, clinics, and shops collect 10x more Google reviews while filtering negative complaints privately.
           </p>
 
           <div className="space-y-3 pt-6 border-t border-emerald-800">
@@ -158,7 +156,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
         </div>
 
         <div className="relative text-xs text-emerald-300 font-medium">
-          © 2026 ReviewBoost. All rights reserved.
+          © 2026 ReviewPe. All rights reserved.
         </div>
       </div>
 
@@ -168,10 +166,8 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
           {/* Header */}
           <div className="mb-8 text-center md:text-left">
             <div className="md:hidden flex items-center justify-center gap-1.5 mb-6">
-              <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm">
-                R
-              </div>
-              <span className="font-extrabold text-slate-900 tracking-tight text-lg">ReviewBoost</span>
+              <img src="/icon.png" alt="ReviewPe Icon" className="w-7 h-7 object-contain rounded-lg" />
+              <span className="font-extrabold text-slate-900 tracking-tight text-lg">ReviewPe</span>
             </div>
 
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -218,7 +214,7 @@ export default function LoginPage({ params }: { params: { locale: string } }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="merchant@reviewboost.com"
+                  placeholder="merchant@reviewpe.online"
                   className="w-full text-sm pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
                 />
               </div>

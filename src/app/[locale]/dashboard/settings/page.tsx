@@ -17,7 +17,8 @@ import {
   Eye,
   Code,
   Copy,
-  Lock
+  Lock,
+  Sparkles
 } from 'lucide-react';
 
 export default function BusinessSettings({ params }: { params: { locale: string } }) {
@@ -33,6 +34,17 @@ export default function BusinessSettings({ params }: { params: { locale: string 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('restaurant');
   const [googlePlaceId, setGooglePlaceId] = useState('');
+
+  // AI Personalization Form States
+  const [vibe, setVibe] = useState('');
+  const [theme, setTheme] = useState('');
+  const [ambiance, setAmbiance] = useState('');
+  const [staffHighlights, setStaffHighlights] = useState('');
+  const [specialties, setSpecialties] = useState('');
+  const [brandValues, setBrandValues] = useState('');
+  const [reviewTone, setReviewTone] = useState('casual');
+  const [targetKeywords, setTargetKeywords] = useState('');
+  const [avoidPhrases, setAvoidPhrases] = useState('');
 
   // Branding Form States
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -63,6 +75,16 @@ export default function BusinessSettings({ params }: { params: { locale: string 
           setName(b.name);
           setCategory(b.category);
           setGooglePlaceId(b.google_place_id);
+          // Pre-fill AI personalization
+          setVibe(b.vibe || '');
+          setTheme(b.theme || '');
+          setAmbiance(b.ambiance || '');
+          setStaffHighlights(b.staff_highlights || '');
+          setSpecialties(b.specialties || '');
+          setBrandValues(b.brand_values || '');
+          setReviewTone(b.review_tone || 'casual');
+          setTargetKeywords(b.target_keywords || '');
+          setAvoidPhrases(b.avoid_phrases || '');
           // Pre-fill branding
           setLogoUrl(b.logo_url);
           setTagline(b.tagline);
@@ -348,6 +370,155 @@ export default function BusinessSettings({ params }: { params: { locale: string 
                 </>
               ) : (
                 <span>Save Changes</span>
+              )}
+            </button>
+          </div>
+        </section>
+
+        {/* AI REVIEW PERSONALIZATION */}
+        <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />
+            <h3 className="font-bold text-slate-800 text-sm tracking-wider uppercase">AI Review Personalization</h3>
+          </div>
+
+          <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+            Customize the details our AI uses to generate personalized customer review suggestions.
+          </p>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Business Vibe</label>
+                <input
+                  type="text"
+                  value={vibe}
+                  onChange={(e) => setVibe(e.target.value)}
+                  placeholder="e.g. Cozy, lively, family-friendly"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Theme / Style</label>
+                <input
+                  type="text"
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                  placeholder="e.g. Modern chic, rustic traditional"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Specialties & Bestsellers</label>
+                <input
+                  type="text"
+                  value={specialties}
+                  onChange={(e) => setSpecialties(e.target.value)}
+                  placeholder="e.g. Masala Chai, Butter Chicken, Hair Spa"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Unique Brand Values</label>
+                <input
+                  type="text"
+                  value={brandValues}
+                  onChange={(e) => setBrandValues(e.target.value)}
+                  placeholder="e.g. Eco-friendly, organic ingredients, handmade"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ambiance details</label>
+              <input
+                type="text"
+                value={ambiance}
+                onChange={(e) => setAmbiance(e.target.value)}
+                placeholder="e.g. Soft lighting, relaxing instrumental music, spacious seating"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Staff & Service Highlights</label>
+              <input
+                type="text"
+                value={staffHighlights}
+                onChange={(e) => setStaffHighlights(e.target.value)}
+                placeholder="e.g. Friendly waiter Javed, super quick checkouts, polite receptionists"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Review Tone of Voice</label>
+                <select
+                  value={reviewTone}
+                  onChange={(e) => setReviewTone(e.target.value)}
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer"
+                >
+                  <option value="casual">Casual & Conversational (Default)</option>
+                  <option value="enthusiastic">Enthusiastic & Exciting</option>
+                  <option value="formal">Formal & Professional</option>
+                  <option value="concise">Concise & Direct</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Target Keywords</label>
+                <input
+                  type="text"
+                  value={targetKeywords}
+                  onChange={(e) => setTargetKeywords(e.target.value)}
+                  placeholder="e.g. worth the money, quick checkout, fresh coffee"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Phrases / Topics to Avoid</label>
+              <input
+                type="text"
+                value={avoidPhrases}
+                onChange={(e) => setAvoidPhrases(e.target.value)}
+                placeholder="e.g. parking, long lines, expensive prices"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
+              />
+            </div>
+            
+            <button
+              onClick={() => handleSave('ai_personalization', { 
+                vibe, 
+                theme, 
+                ambiance, 
+                staff_highlights: staffHighlights, 
+                specialties, 
+                brand_values: brandValues,
+                review_tone: reviewTone,
+                target_keywords: targetKeywords,
+                avoid_phrases: avoidPhrases
+              })}
+              disabled={savingSection === 'ai_personalization'}
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
+            >
+              {savingSection === 'ai_personalization' ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : successSection === 'ai_personalization' ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-300" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <span>Save Personalization</span>
               )}
             </button>
           </div>
@@ -701,7 +872,7 @@ export default function BusinessSettings({ params }: { params: { locale: string 
             </div>
             
             <div className="py-2.5 bg-slate-50 border-t border-slate-100 text-center">
-              <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase">Powered by ReviewBoost</span>
+              <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase">Powered by ReviewPe</span>
             </div>
           </div>
         </div>

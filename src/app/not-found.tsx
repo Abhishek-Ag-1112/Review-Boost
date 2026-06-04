@@ -32,7 +32,7 @@ export default function NotFound() {
           </div>
 
           <span className="text-[10px] font-bold text-slate-400">
-            Powered by ReviewBoost
+            Powered by ReviewPe
           </span>
         </div>
       </body>

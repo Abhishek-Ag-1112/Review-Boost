@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { createServerClient } from '@supabase/ssr';
 import { locales } from './i18n';
+import { decodeJwt } from 'jose';
 
 const intlMiddleware = createIntlMiddleware({
   locales,
@@ -38,11 +39,10 @@ export async function middleware(request: NextRequest) {
       isUserAdmin = sessionCookie === 'mock-admin-session-cookie';
     } else if (sessionCookie) {
       try {
-        const { decodeJwt } = require('jose');
         const payload = decodeJwt(sessionCookie);
         const isExpired = payload.exp ? Date.now() >= payload.exp * 1000 : true;
         
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewboost.com';
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
         isUserAdmin = !isExpired && payload.email === adminEmail;
       } catch (err) {
         console.error('Failed to decode Admin JWT:', err);
@@ -82,7 +82,6 @@ export async function middleware(request: NextRequest) {
       isUserAuthenticated = sessionCookie === 'mock-session-cookie';
     } else if (sessionCookie) {
       try {
-        const { decodeJwt } = require('jose');
         const payload = decodeJwt(sessionCookie);
         const isExpired = payload.exp ? Date.now() >= payload.exp * 1000 : true;
         isUserAuthenticated = !isExpired;

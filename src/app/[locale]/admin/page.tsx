@@ -772,7 +772,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Admin Email</label>
             <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-600">
-              {process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@reviewboost.com'}
+              {process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@reviewpe.online'}
             </div>
           </div>
           
@@ -786,7 +786,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1.5">Support Email</label>
             <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-600">
-              billing@reviewboost.com
+              billing@reviewpe.online
             </div>
           </div>
         </div>
@@ -1070,11 +1070,9 @@ export default function AdminControlPanel({ params }: { params: { locale: string
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-black text-sm shadow-sm">
-                R
-              </div>
+              <img src="/icon.png" alt="ReviewPe Icon" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
               <div>
-                <span className="font-black text-slate-900 tracking-tight text-sm block leading-none">ReviewBoost Admin</span>
+                <span className="font-black text-slate-900 tracking-tight text-sm block leading-none">ReviewPe Admin</span>
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">System Console</span>
               </div>
             </div>

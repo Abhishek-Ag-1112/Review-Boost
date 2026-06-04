@@ -459,7 +459,7 @@ export default function NfcCardsPage({ params }: { params: { locale: string } })
                     Redirect URL to write onto physical card:
                   </span>
                   <div className="flex items-center gap-1 text-slate-700 font-mono text-[10px] font-bold overflow-x-auto whitespace-nowrap">
-                    <span>reviewboost.in/nfc/</span>
+                    <span>reviewpe.in/nfc/</span>
                     <span className="text-indigo-600 font-black">{uid}</span>
                   </div>
                 </div>

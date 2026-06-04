@@ -11,10 +11,8 @@ export default function MarketingPage({ params }: { params: { locale: string } }
       <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-100 z-50">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-base shadow-sm">
-              R
-            </div>
-            <span className="font-extrabold text-slate-900 tracking-tight text-lg">Review<span className="text-emerald-600">Boost</span></span>
+            <img src="/icon.png" alt="ReviewPe Icon" className="w-8 h-8 object-contain rounded-lg" />
+            <span className="font-extrabold text-slate-900 tracking-tight text-lg">Review<span className="text-emerald-600">Pe</span></span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -179,7 +177,7 @@ export default function MarketingPage({ params }: { params: { locale: string } }
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-100 py-8 text-center text-xs text-slate-400 font-medium">
-        Powered by ReviewBoost. Developed for local stores and service shops.
+        Powered by ReviewPe. Developed for local stores and service shops.
       </footer>
     </div>
   );

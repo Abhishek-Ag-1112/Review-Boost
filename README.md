@@ -1,6 +1,6 @@
-# ReviewBoost — Google Reviews SaaS Funnel Platform
+# ReviewPe — Google Reviews SaaS Funnel Platform
 
-ReviewBoost is a complete, high-fidelity, production-ready SaaS application designed to help physical stores (restaurants, salons, retail outlets, clinics) multiply their positive Google Maps reviews, capture private customer feedback, distribute smart NFC tap stands, and export custom print-ready standee designs.
+ReviewPe is a complete, high-fidelity, production-ready SaaS application designed to help physical stores (restaurants, salons, retail outlets, clinics) multiply their positive Google Maps reviews, capture private customer feedback, distribute smart NFC tap stands, and export custom print-ready standee designs.
 
 ---
 
@@ -125,7 +125,7 @@ npm install
 ```bash
 npm run dev
 ```
-Open [http://localhost:3001](http://localhost:3001) in your browser to view the ReviewBoost dashboard.
+Open [http://localhost:3001](http://localhost:3001) in your browser to view the ReviewPe dashboard.
 
 ### 3. Compile Production Bundle
 ```bash

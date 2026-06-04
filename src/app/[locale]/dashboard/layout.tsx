@@ -97,10 +97,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
       {/* Brand logo & Store header */}
       <div className="space-y-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-base shadow-sm">
-            R
-          </div>
-          <span className="font-extrabold text-slate-900 tracking-tight text-lg">Review<span className="text-emerald-600">Boost</span></span>
+          <img src="/icon.png" alt="ReviewPe Icon" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
+          <span className="font-extrabold text-slate-900 tracking-tight text-lg">Review<span className="text-emerald-600">Pe</span></span>
         </div>
 
         {/* Business summary card inside sidebar */}
@@ -186,7 +184,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
               Your Account is Inactive
             </h3>
             <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
-              This business review portal has been suspended or deactivated. For activation, please choose a plan or contact Review-Boost support.
+              This business review portal has been suspended or deactivated. For activation, please choose a plan or contact ReviewPe support.
             </p>
             <div className="mt-8 w-full space-y-3">
               <Link
@@ -196,13 +194,13 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
                 Choose a Plan
               </Link>
               <a
-                href="https://wa.me/+919876543210?text=Hello%20Support,%20my%20ReviewBoost%20account%20has%20been%20suspended.%20Please%20help%20reactivate%20it."
+                href="https://wa.me/+919876543210?text=Hello%20Support,%20my%20ReviewPe%20account%20has%20been%20suspended.%20Please%20help%20reactivate%20it."
                 target="_blank"
                 rel="noreferrer"
                 className="w-full inline-flex items-center justify-center border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-extrabold py-3 px-6 rounded-2xl text-xs gap-2 transition-all shadow-sm"
               >
                 <MessageCircle className="w-4 h-4 text-emerald-600 fill-emerald-50" />
-                <span>Contact Review-Boost Support</span>
+                <span>Contact ReviewPe Support</span>
               </a>
               <button
                 onClick={handleLogout}
@@ -224,7 +222,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             <div>
               <span className="text-xs font-black uppercase tracking-wider block text-red-950">Read-Only Mode Active</span>
               <p className="text-[11px] font-semibold text-red-750 mt-0.5">
-                Your ReviewBoost portal is currently suspended or deactivated. Public QR routes are paused and modifications are locked.
+                Your ReviewPe portal is currently suspended or deactivated. Public QR routes are paused and modifications are locked.
               </p>
             </div>
           </div>
@@ -373,10 +371,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
           </button>
 
           <div className="flex items-center gap-1.5">
-            <div className="w-7.5 h-7.5 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-              R
-            </div>
-            <span className="font-extrabold text-slate-900 tracking-tight text-base">ReviewBoost</span>
+            <img src="/icon.png" alt="ReviewPe Icon" className="w-7.5 h-7.5 object-contain rounded-lg shadow-sm" />
+            <span className="font-extrabold text-slate-900 tracking-tight text-base">ReviewPe</span>
           </div>
 
           <div className="w-6" /> {/* spacer */}

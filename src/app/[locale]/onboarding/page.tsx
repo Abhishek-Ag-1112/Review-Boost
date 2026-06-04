@@ -77,7 +77,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
   useEffect(() => {
     setMounted(true);
     // Load wizard state from localStorage on load
-    const saved = localStorage.getItem('reviewboost_onboarding_state');
+    const saved = localStorage.getItem('reviewpe_onboarding_state');
     if (saved) {
       try {
         const state = JSON.parse(saved);
@@ -114,7 +114,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
       primaryLang,
       slug
     };
-    localStorage.setItem('reviewboost_onboarding_state', JSON.stringify(state));
+    localStorage.setItem('reviewpe_onboarding_state', JSON.stringify(state));
   }, [step, category, name, googlePlaceId, email, whatsapp, logoBase64, brandColor, tagline, primaryLang, slug, mounted]);
 
   if (!mounted) return null;
@@ -181,7 +181,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
   };
 
   // Construct Review Page destination URL
-  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://reviewboost.com';
+  const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://reviewpe.online';
   const reviewUrl = `${appUrl}/r/${slug}`;
 
   // Download QR Code
@@ -227,7 +227,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
 
       if (res.ok) {
         // Clear onboarding storage state
-        localStorage.removeItem('reviewboost_onboarding_state');
+        localStorage.removeItem('reviewpe_onboarding_state');
         // Redirect to dashboard
         window.location.href = `/${locale}/dashboard`;
       } else {
@@ -247,10 +247,8 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
         {/* Stepper Headers */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
-              R
-            </div>
-            <span className="font-extrabold text-slate-900 tracking-tight text-xl">Review<span className="text-emerald-600">Boost</span></span>
+            <img src="/icon.png" alt="ReviewPe Icon" className="w-8 h-8 object-contain rounded-xl" />
+            <span className="font-extrabold text-slate-900 tracking-tight text-xl">Review<span className="text-emerald-600">Pe</span></span>
           </div>
           <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1 rounded-full text-xs font-semibold text-slate-500">
             Step {step} of 4

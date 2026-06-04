@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 💬 ${review.private_feedback || 'No comments'}
 👤 ${review.customer_name || 'Anonymous'}
 📞 ${review.customer_phone || 'Not provided'}
-🔗 View & resolve: ${process.env.NEXT_PUBLIC_APP_URL || 'https://reviewboost.com'}/dashboard/reviews`;
+🔗 View & resolve: ${process.env.NEXT_PUBLIC_APP_URL || 'https://reviewpe.online'}/dashboard/reviews`;
 
     if (twilioClient && business.whatsapp_number) {
       try {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         </table>
 
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://reviewboost.com'}/dashboard/reviews" 
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://reviewpe.online'}/dashboard/reviews" 
              style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; font-size: 15px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
             Mark as Resolved
           </a>
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     if (process.env.RESEND_API_KEY && business.notification_email) {
       try {
         await resend.emails.send({
-          from: process.env.NOTIFICATION_FROM_EMAIL || 'alerts@reviewboost.com',
+          from: process.env.NOTIFICATION_FROM_EMAIL || 'alerts@reviewpe.online',
           to: business.notification_email,
           subject: emailSubject,
           html: emailHtml

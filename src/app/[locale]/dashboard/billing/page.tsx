@@ -81,7 +81,7 @@ export default function BillingPage({ params }: BillingPageProps) {
   const remainingDays = Math.max(0, 30 - elapsedDays);
   const trialProgress = Math.min(100, Math.round((elapsedDays / 30) * 100));
 
-  const supportEmail = 'billing@reviewboost.com';
+  const supportEmail = 'billing@reviewpe.online';
   const supportPhone = '+919876543210';
 
   const planLabels: Record<string, string> = {
@@ -129,8 +129,8 @@ export default function BillingPage({ params }: BillingPageProps) {
   };
 
   const changeDirection = selectedChange === 'downgrade' ? 'downgrade' : 'upgrade';
-  const messageText = `Hello ReviewBoost Support, I would like to change my business "${business.name}" plan from ${planLabels[business.plan]} to ${targetPlan ? planLabels[targetPlan] : 'another plan'}. Please coordinate.`;
-  const emailUrl = `mailto:${supportEmail}?subject=ReviewBoost%20Plan%20Change%20Request&body=${encodeURIComponent(messageText)}`;
+  const messageText = `Hello ReviewPe Support, I would like to change my business "${business.name}" plan from ${planLabels[business.plan]} to ${targetPlan ? planLabels[targetPlan] : 'another plan'}. Please coordinate.`;
+  const emailUrl = `mailto:${supportEmail}?subject=ReviewPe%20Plan%20Change%20Request&body=${encodeURIComponent(messageText)}`;
   const whatsappUrl = `https://wa.me/${supportPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(messageText)}`;
 
   return (
@@ -138,7 +138,7 @@ export default function BillingPage({ params }: BillingPageProps) {
       {/* Header bar */}
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Subscription & Billing</h1>
-        <p className="text-sm text-slate-500 font-semibold mt-1">View your current plan and request upgrades. Plan changes are managed by the ReviewBoost admin team.</p>
+        <p className="text-sm text-slate-500 font-semibold mt-1">View your current plan and request upgrades. Plan changes are managed by the ReviewPe admin team.</p>
       </div>
 
       {/* Subscription Summary Panel */}
