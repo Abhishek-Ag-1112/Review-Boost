@@ -216,6 +216,6 @@ Example: ["suggestion 1", "suggestion 2", "suggestion 3", ..., "suggestion 15"]`
     return NextResponse.json({ suggestions: shuffled });
   } catch (error) {
     console.error('API Suggestions Error:', error);
-    return NextResponse.json({ suggestions: fallbacks[language] || fallbacks.en });
+    return NextResponse.json({ suggestions: fallbacks.en });
   }
 }
