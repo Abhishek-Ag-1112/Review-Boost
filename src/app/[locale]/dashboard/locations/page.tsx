@@ -8,6 +8,8 @@ import {
   createLocation, 
   deleteLocation, 
   toggleLocationActive,
+  getReviewsInbox,
+  getScans,
   Business 
 } from '@/lib/db';
 import UpgradeGate from '../UpgradeGate';
@@ -52,10 +54,51 @@ export default function LocationsPage({ params }: { params: { locale: string } }
       const b = await getFirstBusinessForOwner('mock-owner');
       if (b) {
         setBusiness(b);
-        if (b.plan === 'growth' || b.plan === 'starter' || b.plan === 'free') {
-          const locs = await getLocations(b.id);
-          setLocations(locs);
-        }
+        
+        // Fetch locations, reviews, and scans concurrently
+        const [locs, revs, scans] = await Promise.all([
+          getLocations(b.id),
+          getReviewsInbox(b.id, {}),
+          getScans(b.id)
+        ]);
+
+        // Calculate metrics for each branch location
+        const calculatedLocations = (locs || []).map(loc => {
+          const locReviews = revs.filter((r: any) => r.location_id === loc.id);
+          const locScans = scans.filter((s: any) => s.location_id === loc.id);
+          
+          const avg = locReviews.length > 0 
+            ? parseFloat((locReviews.reduce((sum: number, r: any) => sum + r.stars, 0) / locReviews.length).toFixed(1))
+            : 0.0;
+            
+          return {
+            ...loc,
+            avg_rating: avg,
+            scans_count: locScans.length
+          };
+        });
+
+        // Calculate metrics for the Main Branch (where location_id is null/undefined)
+        const mainReviews = revs.filter((r: any) => !r.location_id);
+        const mainScans = scans.filter((s: any) => !s.location_id);
+        const mainAvg = mainReviews.length > 0
+          ? parseFloat((mainReviews.reduce((sum: number, r: any) => sum + r.stars, 0) / mainReviews.length).toFixed(1))
+          : 0.0;
+
+        const mainBranchObj = {
+          id: 'main',
+          name: `${b.name} (Main Branch)`,
+          slug: b.slug,
+          google_place_id: b.google_place_id,
+          google_review_url: b.google_review_url,
+          is_active: b.is_active,
+          avg_rating: mainAvg,
+          scans_count: mainScans.length,
+          is_main: true
+        };
+
+        // Put Main Branch at the top of the list
+        setLocations([mainBranchObj, ...calculatedLocations]);
       }
     } catch (err) {
       console.error('Failed to load locations page data:', err);
@@ -103,14 +146,22 @@ export default function LocationsPage({ params }: { params: { locale: string } }
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+  const handleToggleActive = async (id: string, currentStatus: boolean, isMain?: boolean) => {
+    if (isMain) {
+      alert('The active status of the Main Branch is managed in Settings.');
+      return;
+    }
     const success = await toggleLocationActive(id, !currentStatus);
     if (success) {
       setLocations(locations.map(loc => loc.id === id ? { ...loc, is_active: !currentStatus } : loc));
     }
   };
 
-  const handleDeleteLocation = async (id: string) => {
+  const handleDeleteLocation = async (id: string, isMain?: boolean) => {
+    if (isMain) {
+      alert('The Main Branch cannot be deleted.');
+      return;
+    }
     if (confirm('Are you sure you want to delete this branch location? NFC cards and scans associated with it will no longer map to this branch.')) {
       const success = await deleteLocation(id);
       if (success) {
@@ -136,7 +187,7 @@ export default function LocationsPage({ params }: { params: { locale: string } }
     try {
       const newLoc = await createLocation(business.id, branchName, placeId, customSlug);
       if (newLoc) {
-        setLocations([...locations, { ...newLoc, scans_count: 0, avg_rating: 0 }]);
+        await loadData();
         setShowAddModal(false);
         setBranchName('');
         setPlaceId('');
@@ -161,10 +212,10 @@ export default function LocationsPage({ params }: { params: { locale: string } }
         </div>
         <button
           onClick={() => {
-            if ((business.plan === 'starter' || business.plan === 'free') && locations.length >= 1) {
+            if ((business.plan === 'starter' || business.plan === 'free') && locations.length >= 0) {
               setShowUpgradeModal(true);
-            } else if (business.plan === 'growth' && locations.length >= 10) {
-              alert('You have reached the maximum limit of 10 locations on the Growth plan.');
+            } else if (business.plan === 'growth' && locations.length >= 2) {
+              alert('You have reached the maximum limit of 3 locations (1 main + 2 branches) on the Growth plan.');
             } else {
               setShowAddModal(true);
             }
@@ -183,12 +234,12 @@ export default function LocationsPage({ params }: { params: { locale: string } }
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Branch Details</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Place ID</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Avg Rating</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Total Scans</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider min-w-[180px]">Branch Details</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider min-w-[140px]">Place ID</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[100px]">Avg Rating</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[100px]">Total Scans</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[100px]">Status</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right min-w-[120px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -220,16 +271,22 @@ export default function LocationsPage({ params }: { params: { locale: string } }
                       {loc.scans_count || 0}
                     </td>
                     <td className="py-4 px-6 text-center">
-                      <button
-                        onClick={() => handleToggleActive(loc.id, loc.is_active)}
-                        className={`inline-flex text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border cursor-pointer transition-colors ${
-                          loc.is_active 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                        }`}
-                      >
-                        {loc.is_active ? 'Active' : 'Disabled'}
-                      </button>
+                      {loc.is_main ? (
+                        <span className="inline-flex text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed">
+                          Always Active
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleToggleActive(loc.id, loc.is_active, loc.is_main)}
+                          className={`inline-flex text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border cursor-pointer transition-colors ${
+                            loc.is_active 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100' 
+                              : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                          }`}
+                        >
+                          {loc.is_active ? 'Active' : 'Disabled'}
+                        </button>
+                      )}
                     </td>
                     <td className="py-4 px-6 text-right space-x-1.5">
                       <button
@@ -249,9 +306,14 @@ export default function LocationsPage({ params }: { params: { locale: string } }
                         <ExternalLink className="w-4 h-4" />
                       </a>
                       <button
-                        onClick={() => handleDeleteLocation(loc.id)}
+                        onClick={() => handleDeleteLocation(loc.id, loc.is_main)}
+                        disabled={loc.is_main}
                         title="Delete branch"
-                        className="inline-flex items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-red-600 hover:bg-red-50/20 text-slate-500 hover:text-red-600 transition-all cursor-pointer"
+                        className={`inline-flex items-center justify-center p-2 rounded-xl border transition-all ${
+                          loc.is_main 
+                            ? 'opacity-40 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400' 
+                            : 'border-slate-200 hover:border-red-600 hover:bg-red-50/20 text-slate-500 hover:text-red-600 cursor-pointer'
+                        }`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

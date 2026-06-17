@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   getAnalyticsDailyScans, 
   getStarDistribution, 
@@ -8,7 +9,8 @@ import {
   getPeakScansHeatmap,
   getDashboardSummary,
   getFirstBusinessForOwner,
-  Business
+  Business,
+  getLocations
 } from '@/lib/db';
 import { 
   BarChart3, 
@@ -31,6 +33,8 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
 
   // Filters State
   const [dateRange, setDateRange] = useState<number>(30); // 7, 30, 90 days
+  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>('');
 
   // Metrics Data
   const [summary, setSummary] = useState<any>(null);
@@ -48,12 +52,16 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
         if (!b) return;
         setBusiness(b);
 
+        // Fetch locations list
+        const locs = await getLocations(b.id);
+        setLocations(locs || []);
+
         const [s, scans, stars, sources, heat] = await Promise.all([
-          getDashboardSummary(b.id),
-          getAnalyticsDailyScans(b.id, dateRange),
-          getStarDistribution(b.id),
-          getScanSourceBreakdown(b.id),
-          getPeakScansHeatmap(b.id)
+          getDashboardSummary(b.id, selectedLocationId || undefined),
+          getAnalyticsDailyScans(b.id, dateRange, selectedLocationId || undefined),
+          getStarDistribution(b.id, selectedLocationId || undefined),
+          getScanSourceBreakdown(b.id, selectedLocationId || undefined),
+          getPeakScansHeatmap(b.id, selectedLocationId || undefined)
         ]);
 
         setSummary(s);
@@ -69,7 +77,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
     }
 
     loadData();
-  }, [dateRange]);
+  }, [dateRange, selectedLocationId]);
 
   if (!mounted || loading) {
     return (
@@ -139,8 +147,14 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
 
   // Export Analytics CSV
   const handleExportCSV = () => {
+    if (business.plan !== 'growth') {
+      alert('CSV Export is available on the Growth plan. Please upgrade to unlock.');
+      return;
+    }
+    const locationName = selectedLocationId ? (locations.find(l => l.id === selectedLocationId)?.name || 'Branch') : 'All Branches';
     const headers = ['Metric', 'Value'];
     const rows = [
+      ['Branch / Location', locationName],
       ['Total Scans', summary.totalScans],
       ['Total Reviews', summary.totalReviews],
       ['Average Rating', summary.averageStars],
@@ -154,7 +168,8 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${business.slug}-analytics.csv`);
+    const locationSlug = selectedLocationId ? (locations.find(l => l.id === selectedLocationId)?.slug || 'branch') : 'all';
+    link.setAttribute("download", `${business.slug}-${locationSlug}-analytics.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -170,16 +185,52 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          {/* Location / Branch filter */}
+          <div className="relative">
+            {business.plan === 'growth' ? (
+              <select
+                value={selectedLocationId}
+                onChange={(e) => setSelectedLocationId(e.target.value)}
+                className="text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer"
+              >
+                <option value="">All Branches</option>
+                <option value="main">Main Branch</option>
+                {locations.map(loc => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+            ) : (
+              <select
+                disabled
+                value=""
+                className="text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed font-medium"
+              >
+                <option value="">All Branches (Growth Only 🔒)</option>
+              </select>
+            )}
+          </div>
+
           {/* Date range filter */}
           <div className="relative">
             <select
               value={dateRange}
-              onChange={(e) => setDateRange(parseInt(e.target.value, 10))}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (val > 30 && business.plan !== 'growth') {
+                  alert('90 Days analytics history is a Growth plan feature. Please upgrade to unlock.');
+                  return;
+                }
+                setDateRange(val);
+              }}
               className="text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer"
             >
               <option value="7">Last 7 Days</option>
               <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
+              {business.plan === 'growth' ? (
+                <option value="90">Last 90 Days (3 Months)</option>
+              ) : (
+                <option value="90" disabled>Last 90 Days (Growth Only)</option>
+              )}
             </select>
           </div>
           
@@ -321,7 +372,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
         </div>
 
         {/* Peak Scan Times Heatmap */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between relative overflow-hidden">
           <div>
             <h3 className="font-bold text-slate-800 text-xs tracking-wider uppercase mb-1">Peak Scan Times Heatmap</h3>
             <span className="text-[10px] font-bold text-slate-400">Hourly density of QR scans across the week</span>
@@ -329,7 +380,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
 
           {/* Grid heatmap table */}
           <div className="mt-4 overflow-x-auto w-full">
-            <table className="w-full border-collapse text-[9px] font-bold text-slate-500 select-none min-w-[340px]">
+            <table className="w-full border-collapse text-[9px] font-bold text-slate-500 select-none min-w-[440px]">
               <thead>
                 <tr>
                   <th className="p-1"></th>
@@ -389,6 +440,24 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
               <span>High</span>
             </div>
           </div>
+          
+          {business.plan !== 'growth' && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-10 animate-fade-in">
+              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 shadow-inner">
+                <Clock className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Peak Scan Heatmap Locked</h4>
+              <p className="text-[10px] text-slate-505 font-semibold mt-1 max-w-xs leading-normal">
+                This feature is available on the Growth plan. Upgrade to view hourly scan density and optimize your review generation.
+              </p>
+              <Link
+                href={`/${locale}/dashboard/billing`}
+                className="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl text-[10px] transition-colors shadow-sm"
+              >
+                Upgrade Plan
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

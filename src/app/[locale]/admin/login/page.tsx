@@ -151,7 +151,7 @@ export default function AdminLoginPage({ params }: { params: { locale: string } 
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@reviewpe.online"
+                  placeholder="Enter your email"
                   className="w-full text-sm pl-10 pr-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>

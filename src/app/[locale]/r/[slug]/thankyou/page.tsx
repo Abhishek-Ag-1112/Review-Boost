@@ -77,7 +77,7 @@ export default async function ThankYouPage({ params, searchParams }: ThankYouPro
         </p>
 
         {/* Exit banner */}
-        {business.plan !== 'growth' && (
+        {!(business.plan === 'growth' && business.hide_branding) && (
           <div className="mt-8 pt-6 border-t border-slate-100 w-full">
             <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
               Powered by ReviewPe

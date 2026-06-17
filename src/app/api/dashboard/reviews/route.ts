@@ -34,19 +34,27 @@ export async function GET(req: NextRequest) {
 
     const businessId = business.id;
 
-    // 2. Parse query parameters
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search') || undefined;
     const starsParam = searchParams.get('stars');
     const isPublicParam = searchParams.get('isPublic');
     const isResolvedParam = searchParams.get('isResolved');
     const sort = searchParams.get('sort') || 'newest';
+    const locationId = searchParams.get('locationId') || undefined;
 
     const stars = starsParam ? parseInt(starsParam, 10) : undefined;
     const isPublic = isPublicParam === 'true' ? true : isPublicParam === 'false' ? false : undefined;
     const isResolved = isResolvedParam === 'true' ? true : isResolvedParam === 'false' ? false : undefined;
 
     let query = supabase.from('reviews').select('*').eq('business_id', businessId);
+
+    if (locationId) {
+      if (locationId === 'main') {
+        query = query.is('location_id', null);
+      } else {
+        query = query.eq('location_id', locationId);
+      }
+    }
 
     if (isPublic !== undefined) {
       query = query.eq('is_public', isPublic);

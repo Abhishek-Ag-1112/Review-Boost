@@ -50,6 +50,7 @@ export default function BusinessSettings({ params }: { params: { locale: string 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [tagline, setTagline] = useState('');
   const [brandColor, setBrandColor] = useState('#000000');
+  const [hideBranding, setHideBranding] = useState(false);
 
   // Language Form States
   const [primaryLanguage, setPrimaryLanguage] = useState('en');
@@ -89,6 +90,7 @@ export default function BusinessSettings({ params }: { params: { locale: string 
           setLogoUrl(b.logo_url);
           setTagline(b.tagline);
           setBrandColor(b.brand_color);
+          setHideBranding(!!b.hide_branding);
           // Pre-fill languages
           setPrimaryLanguage(b.language);
           // Pre-fill notifications
@@ -356,8 +358,39 @@ export default function BusinessSettings({ params }: { params: { locale: string 
               </div>
             </div>
             
+            {/* White label toggle */}
+            <div className="flex items-center pt-3 border-t border-slate-100 mt-4">
+              {business.plan === 'growth' ? (
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hideBranding}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setHideBranding(checked);
+                    }}
+                    className="w-4.5 h-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-700 block">Hide ReviewPe Branding (White-label)</span>
+                    <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">Remove the &quot;Powered by ReviewPe&quot; footer branding from your customer pages.</span>
+                  </div>
+                </label>
+              ) : (
+                <div className="flex items-start gap-2.5 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-xl w-full">
+                  <Lock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 block flex items-center gap-1">
+                      Hide ReviewPe Branding <span className="text-[8px] font-black bg-indigo-50 border border-indigo-150 text-indigo-600 px-1.5 py-0.5 rounded">Growth Plan</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold block mt-1">Remove the ReviewPe watermark from your pages. Upgrade to Growth Plan to unlock.</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
-              onClick={() => handleSave('branding', { tagline, brand_color: brandColor })}
+              onClick={() => handleSave('branding', { tagline, brand_color: brandColor, hide_branding: hideBranding })}
               disabled={savingSection === 'branding'}
               className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
             >
@@ -771,16 +804,16 @@ export default function BusinessSettings({ params }: { params: { locale: string 
             Actions in this section are highly sensitive. Please make sure of details before making updates.
           </p>
 
-          <div className="flex gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleDeactivate}
-              className="px-4.5 py-2.5 rounded-xl bg-white border border-red-200 hover:bg-red-50 text-red-700 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              className="w-full sm:w-auto px-4.5 py-2.5 rounded-xl bg-white border border-red-200 hover:bg-red-55 text-red-700 text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Deactivate Portal</span>
             </button>
             <button
               onClick={handleDeleteAccount}
-              className="px-4.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              className="w-full sm:w-auto px-4.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Trash2 className="w-4 h-4 shrink-0" />
               <span>Delete All Store Data</span>
@@ -871,9 +904,11 @@ export default function BusinessSettings({ params }: { params: { locale: string 
               )}
             </div>
             
-            <div className="py-2.5 bg-slate-50 border-t border-slate-100 text-center">
-              <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase">Powered by ReviewPe</span>
-            </div>
+            {!(business.plan === 'growth' && hideBranding) && (
+              <div className="py-2.5 bg-slate-50 border-t border-slate-100 text-center">
+                <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase">Powered by ReviewPe</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import { getFirstBusinessForOwner, Business } from '@/lib/db';
+import { getFirstBusinessForOwner, Business, getLocations } from '@/lib/db';
 import { 
   Download, 
   Copy, 
@@ -32,12 +32,22 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>('main');
 
   useEffect(() => {
     setMounted(true);
     getFirstBusinessForOwner('mock-owner')
-      .then(b => {
+      .then(async (b) => {
         setBusiness(b);
+        if (b) {
+          try {
+            const locs = await getLocations(b.id);
+            setLocations(locs || []);
+          } catch (e) {
+            console.error('Error fetching locations:', e);
+          }
+        }
         setLoading(false);
       });
   }, []);
@@ -53,9 +63,13 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
 
   if (!business) return null;
 
+  const selectedLocation = locations.find(loc => loc.id === selectedLocationId);
+  const activeSlug = selectedLocation ? selectedLocation.slug : business.slug;
+  const activeName = selectedLocation ? `${business.name} - ${selectedLocation.name}` : business.name;
+
   // Determine review page URL
   const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://reviewpe.online';
-  const reviewUrl = `${appUrl}/r/${business.slug}`;
+  const reviewUrl = `${appUrl}/r/${activeSlug}`;
 
   // Copy URL to Clipboard
   const handleCopyLink = () => {
@@ -82,7 +96,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
           ctx.drawImage(img, 0, 0, 1024, 1024);
           const url = offscreenCanvas.toDataURL('image/png');
           const link = document.createElement('a');
-          link.download = `${business.slug}-highres-qr.png`;
+          link.download = `${activeSlug}-highres-qr.png`;
           link.href = url;
           link.click();
         }
@@ -99,7 +113,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const svgUrl = URL.createObjectURL(svgBlob);
       const link = document.createElement('a');
-      link.download = `${business.slug}-qr.svg`;
+      link.download = `${activeSlug}-qr.svg`;
       link.href = svgUrl;
       link.click();
       URL.revokeObjectURL(svgUrl);
@@ -121,7 +135,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           qrDataUrl,
-          businessName: business.name,
+          businessName: activeName,
           tagline: business.tagline,
           brandColor: business.brand_color,
           size,
@@ -134,7 +148,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
         const fileURL = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = fileURL;
-        link.download = `${business.slug}-${size}-standee.pdf`;
+        link.download = `${activeSlug}-${size}-standee.pdf`;
         link.click();
         URL.revokeObjectURL(fileURL);
       } else {
@@ -157,9 +171,33 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left side Live QR Preview Card */}
       <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-between min-h-[380px] lg:col-span-1">
-        <div>
+        <div className="w-full flex flex-col items-center">
           <h3 className="font-bold text-slate-800 text-sm tracking-wider uppercase mb-1 text-center">QR Code Preview</h3>
           <span className="text-[10px] font-bold text-slate-400 block text-center">Live preview of your review landing link</span>
+          
+          {/* Branch Dropdown Selector */}
+          <div className="w-full mt-4">
+            {business.plan === 'growth' ? (
+              <select
+                value={selectedLocationId}
+                onChange={(e) => setSelectedLocationId(e.target.value)}
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer font-bold text-slate-700 text-center"
+              >
+                <option value="main">Main Branch (Default)</option>
+                {locations.map(loc => (
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
+                ))}
+              </select>
+            ) : (
+              <select
+                disabled
+                value="main"
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-450 cursor-not-allowed font-semibold text-center"
+              >
+                <option value="main">Main Branch (Growth Only 🔒)</option>
+              </select>
+            )}
+          </div>
         </div>
 
         {/* Display Canvas QR Code */}
@@ -245,7 +283,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
         </div>
 
         {/* Core Quick Downloads */}
-        <div className="flex gap-2 w-full">
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
           <button
             onClick={handleDownloadPNG}
             className="flex-1 py-2.5 text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl transition-all border border-slate-200/60 shadow-sm flex items-center justify-center gap-1.5"

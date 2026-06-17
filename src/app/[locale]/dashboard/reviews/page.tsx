@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getReviewsInbox, getFirstBusinessForOwner, Business, Review } from '@/lib/db';
+import { getReviewsInbox, getFirstBusinessForOwner, Business, Review, getLocations } from '@/lib/db';
 import { 
   Search, 
   Star, 
@@ -24,6 +24,8 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>('');
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'public' | 'private'>('public');
@@ -58,6 +60,9 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
     getFirstBusinessForOwner('mock-owner')
       .then(b => {
         setBusiness(b);
+        if (b) {
+          getLocations(b.id).then(locs => setLocations(locs || []));
+        }
       });
   }, []);
 
@@ -72,7 +77,8 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       stars: starFilter,
       isPublic,
       isResolved: resolvedFilter,
-      sort: sortOrder
+      sort: sortOrder,
+      locationId: selectedLocationId || undefined
     }).then(data => {
       setReviews(data);
       // Pre-fill notes inputs
@@ -86,7 +92,7 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       console.error(err);
       setLoading(false);
     });
-  }, [business, activeTab, debouncedSearch, starFilter, resolvedFilter, sortOrder]);
+  }, [business, activeTab, debouncedSearch, starFilter, resolvedFilter, sortOrder, selectedLocationId]);
 
   if (!mounted) return null;
 
@@ -139,9 +145,10 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
     if (reviews.length === 0) return;
 
     // Header row
-    const headers = ['Date', 'Stars', 'Type', 'Feedback/Text', 'Customer Name', 'Customer Phone', 'AI Chip Used', 'Resolution Status', 'Owner Note'];
+    const headers = ['Date', 'Branch/Location', 'Stars', 'Type', 'Feedback/Text', 'Customer Name', 'Customer Phone', 'AI Chip Used', 'Resolution Status', 'Owner Note'];
     const rows = reviews.map(r => [
       new Date(r.created_at).toLocaleDateString(),
+      r.location_id ? (locations.find(l => l.id === r.location_id)?.name || 'Unknown Branch') : 'Main Business',
       `${r.stars} Stars`,
       r.is_public ? 'Public' : 'Private',
       r.is_public ? (r.custom_text || '') : (r.private_feedback || ''),
@@ -159,7 +166,8 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${business?.slug || 'reviews'}-export.csv`);
+    const locationSlug = selectedLocationId ? (locations.find(l => l.id === selectedLocationId)?.slug || 'branch') : 'all';
+    link.setAttribute("download", `${business?.slug || 'reviews'}-${locationSlug}-export.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -209,7 +217,7 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       </div>
 
       {/* Filters Control Box */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
@@ -220,6 +228,31 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
             placeholder="Search text or customer..."
             className="w-full text-xs pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition-all"
           />
+        </div>
+
+        {/* Branch / Location filter */}
+        <div className="relative">
+          {business?.plan === 'growth' ? (
+            <select
+              value={selectedLocationId}
+              onChange={(e) => setSelectedLocationId(e.target.value)}
+              className="w-full text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer"
+            >
+              <option value="">All Branches</option>
+              <option value="main">Main Branch</option>
+              {locations.map(loc => (
+                <option key={loc.id} value={loc.id}>{loc.name}</option>
+              ))}
+            </select>
+          ) : (
+            <select
+              disabled
+              value=""
+              className="w-full text-xs px-3.5 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed font-medium"
+            >
+              <option value="">All Branches (Growth Only 🔒)</option>
+            </select>
+          )}
         </div>
 
         {/* Stars Filter */}
@@ -313,6 +346,16 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
                       {rev.language_used}
                     </span>
                   )}
+
+                  {/* Branch Location badge */}
+                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1 border ${
+                    rev.location_id 
+                      ? 'bg-blue-50 text-blue-700 border-blue-100' 
+                      : 'bg-slate-50 text-slate-600 border-slate-200'
+                  }`}>
+                    <span>📍</span>
+                    <span>{rev.location_id ? (locations.find(l => l.id === rev.location_id)?.name || 'Branch') : 'Main Branch'}</span>
+                  </span>
 
                   {/* Resolution status badge (Private feedback only) */}
                   {!rev.is_public && (

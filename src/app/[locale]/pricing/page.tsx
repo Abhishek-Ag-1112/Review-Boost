@@ -30,16 +30,16 @@ export default function PricingPage({ params }: PricingPageProps) {
       a: "Absolutely. We support all Indian payment methods including UPI (Google Pay, PhonePe, Paytm, BHIM), local credit/debit cards, and net banking. Payments are manually processed and matched by our administrator for instant activation."
     },
     {
-      q: "I have more than 10 locations. Can I expand further?",
-      a: "Yes. For enterprises or franchises requiring more than 10 business locations/NFC cards, we offer customized Enterprise plans. Please contact the admin directly to set up bulk licensing and dedicated support."
+      q: "I have more than 3 locations. Can I expand further?",
+      a: "Yes. For enterprises or franchises requiring more than 3 business locations/NFC cards, we offer customized Enterprise plans. Please contact the admin directly to set up bulk licensing and dedicated support."
     }
   ];
 
   const features = [
     { name: "Free Plan Benefit", starter: "First month FREE ✓", growth: "First month FREE ✓", isHighlight: true },
-    { name: "Location Branches Limit", starter: "1 Location", growth: "Up to 10 Locations" },
-    { name: "NFC Cards Supported", starter: "1 NFC Card", growth: "Up to 10 NFC Cards" },
-    { name: "Analytics History", starter: "Up to 30 Days", growth: "Unlimited History" },
+    { name: "Location Branches Limit", starter: "1 Location", growth: "Up to 3 Locations" },
+    { name: "NFC Cards Supported", starter: "1 NFC Card", growth: "Up to 3 NFC Cards" },
+    { name: "Analytics History", starter: "Up to 30 Days", growth: "3 Months History" },
     { name: "Peak Scans Heatmap", starter: false, growth: true },
     { name: "CSV Export (Scan & Feedback Logs)", starter: false, growth: true },
     { name: "White-label Options (Remove Brand)", starter: false, growth: true },
@@ -205,13 +205,13 @@ export default function PricingPage({ params }: PricingPageProps) {
                 <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">Up to 10 Locations & NFC Cards</span>
+                <span className="text-xs font-bold text-slate-700">Up to 3 Locations & NFC Cards</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">Unlimited Analytics History</span>
+                <span className="text-xs font-bold text-slate-700">3-Month Analytics History</span>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
@@ -278,9 +278,9 @@ export default function PricingPage({ params }: PricingPageProps) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-5 px-6 text-xs font-bold text-slate-450 uppercase tracking-wider">Features</th>
-                  <th className="py-5 px-6 text-xs font-black text-emerald-700 uppercase tracking-wider text-center w-40">STARTER (₹399)</th>
-                  <th className="py-5 px-6 text-xs font-black text-indigo-750 uppercase tracking-wider text-center w-40">GROWTH (₹799)</th>
+                  <th className="py-5 px-6 text-xs font-bold text-slate-450 uppercase tracking-wider min-w-[160px]">Features</th>
+                  <th className="py-5 px-6 text-xs font-black text-emerald-700 uppercase tracking-wider text-center w-40 min-w-[120px]">STARTER (₹399)</th>
+                  <th className="py-5 px-6 text-xs font-black text-indigo-750 uppercase tracking-wider text-center w-40 min-w-[120px]">GROWTH (₹799)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

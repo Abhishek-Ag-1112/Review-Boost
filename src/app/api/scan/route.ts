@@ -3,7 +3,7 @@ import { logScan } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
-    const { businessId, scanSource } = await request.json();
+    const { businessId, scanSource, locationId } = await request.json();
     const userAgent = request.headers.get('user-agent') || undefined;
     const referrer = request.headers.get('referer') || undefined;
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    await logScan(businessId, scanSource, userAgent, referrer);
+    await logScan(businessId, scanSource, userAgent, referrer, locationId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('API Scan logging error:', error);

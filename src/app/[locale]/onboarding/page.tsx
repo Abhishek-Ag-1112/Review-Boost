@@ -588,7 +588,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
 
             {/* Share link and CTA section */}
             <div className="w-full flex flex-col gap-2.5 pt-6 border-t border-slate-100">
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"
                   onClick={copyLink}

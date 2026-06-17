@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       customerPhone,
       aiSuggestionUsed,
       customText,
-      languageUsed
+      languageUsed,
+      locationId
     } = await request.json();
 
     if (!businessId || !stars) {
@@ -28,7 +29,8 @@ export async function POST(request: NextRequest) {
       customer_phone: customerPhone,
       ai_suggestion_used: aiSuggestionUsed,
       custom_text: customText,
-      language_used: languageUsed
+      language_used: languageUsed,
+      location_id: locationId
     });
 
     if (!savedReview) {

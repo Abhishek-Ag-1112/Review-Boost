@@ -33,15 +33,30 @@ export async function GET(req: NextRequest) {
     }
 
     const businessId = business.id;
+    const { searchParams } = new URL(req.url);
+    const locationId = searchParams.get('locationId') || undefined;
 
     // 2. Fetch all required analytics concurrently
+    let scansQuery = supabase.from('qr_scans').select('scan_source').eq('business_id', businessId);
+    let reviewsQuery = supabase.from('reviews').select('id, stars, is_public, is_resolved, custom_text, private_feedback, customer_name, created_at, location_id').eq('business_id', businessId).order('created_at', { ascending: false });
+    let dailyScansQuery = supabase.from('qr_scans').select('scanned_at').eq('business_id', businessId).gte('scanned_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+    if (locationId) {
+      if (locationId === 'main') {
+        scansQuery = scansQuery.is('location_id', null);
+        reviewsQuery = reviewsQuery.is('location_id', null);
+        dailyScansQuery = dailyScansQuery.is('location_id', null);
+      } else {
+        scansQuery = scansQuery.eq('location_id', locationId);
+        reviewsQuery = reviewsQuery.eq('location_id', locationId);
+        dailyScansQuery = dailyScansQuery.eq('location_id', locationId);
+      }
+    }
+
     const [scansRes, reviewsRes, dailyScansRes] = await Promise.all([
-      // Total Scans raw sources
-      supabase.from('qr_scans').select('scan_source').eq('business_id', businessId),
-      // Reviews data ordered by new
-      supabase.from('reviews').select('id, stars, is_public, is_resolved, custom_text, private_feedback, customer_name, created_at').eq('business_id', businessId).order('created_at', { ascending: false }),
-      // Daily scans for charts (last 30 days)
-      supabase.from('qr_scans').select('scanned_at').eq('business_id', businessId).gte('scanned_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+      scansQuery,
+      reviewsQuery,
+      dailyScansQuery
     ]);
 
     const scansData = scansRes.data || [];

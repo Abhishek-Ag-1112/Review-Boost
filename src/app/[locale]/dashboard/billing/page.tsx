@@ -282,8 +282,8 @@ export default function BillingPage({ params }: BillingPageProps) {
           <h3 className="text-xl font-black text-slate-800 mt-2">₹799</h3>
           <span className="text-xs font-bold text-slate-400">/month</span>
           <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
-            {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', 'Up to 10 Locations', 'Up to 10 NFC Cards', 'Peak Scan Heatmap', 'Developer API', 'White-label'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+            {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', 'Up to 3 Locations', 'Up to 3 NFC Cards', '3-Month Analytics History', 'Peak Scan Heatmap', 'Developer API', 'White-label'].map(f => (
+              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-605">
                 <Check className="w-3.5 h-3.5 text-indigo-600" />
                 <span>{f}</span>
               </div>

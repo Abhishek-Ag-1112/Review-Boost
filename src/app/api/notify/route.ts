@@ -62,6 +62,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to retrieve notification context' }, { status: 500 });
       }
 
+      if (rData.business_id !== bData.id) {
+        return NextResponse.json({ error: 'Invalid association between business and review' }, { status: 400 });
+      }
+
       business = bData;
       review = rData;
     }

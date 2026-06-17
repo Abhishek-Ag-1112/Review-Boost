@@ -218,8 +218,8 @@ export default function NfcCardsPage({ params }: { params: { locale: string } })
           onClick={() => {
             if ((business.plan === 'starter' || business.plan === 'free') && nfcCards.length >= 1) {
               setShowUpgradeModal(true);
-            } else if (business.plan === 'growth' && nfcCards.length >= 10) {
-              alert('You have reached the maximum limit of 10 NFC cards on the Growth plan.');
+            } else if (business.plan === 'growth' && nfcCards.length >= 3) {
+              alert('You have reached the maximum limit of 3 NFC cards on the Growth plan.');
             } else {
               setShowAddModal(true);
             }
@@ -253,13 +253,13 @@ export default function NfcCardsPage({ params }: { params: { locale: string } })
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Card Label</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Chip UID</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Linked Destination</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Taps</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Conversion</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider min-w-[180px]">Card Label</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider min-w-[120px]">Chip UID</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider min-w-[150px]">Linked Destination</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[80px]">Taps</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[100px]">Conversion</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-center min-w-[100px]">Status</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider text-right min-w-[120px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

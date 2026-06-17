@@ -30,9 +30,10 @@ export default function MarketingPage({ params }: { params: { locale: string } }
             </Link>
             <Link 
               href={`/${locale}/login`} 
-              className="text-xs font-bold px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
+              className="text-xs font-bold px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm shrink-0"
             >
-              Get Started Free
+              <span className="sm:hidden">Start Free</span>
+              <span className="hidden sm:inline">Get Started Free</span>
             </Link>
           </div>
         </div>
@@ -150,7 +151,7 @@ export default function MarketingPage({ params }: { params: { locale: string } }
                     <span className="text-slate-400 text-xs font-bold">/ month</span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-                    Up to 10 physical locations/NFC cards, dynamic routing, full peak heatmap analytics, CSV exports, white-label, and API access.
+                    Up to 3 physical locations, 3-month analytics history, peak time heatmap analytics, CSV exports, white-label toggles, and API access.
                   </p>
                 </div>
                 <Link

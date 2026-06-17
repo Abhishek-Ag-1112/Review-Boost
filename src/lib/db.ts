@@ -8,30 +8,38 @@ function getSupabaseClient() {
 }
 
 let clientDashboardDataCache: any = null;
-let clientDashboardDataPromise: Promise<any> | null = null;
+let clientDashboardDataPromiseMap: Record<string, Promise<any> | null> = {};
 
-async function fetchClientDashboardData() {
+async function fetchClientDashboardData(locationId?: string) {
   if (typeof window === 'undefined') return null;
-  if (clientDashboardDataCache) return clientDashboardDataCache;
-  if (clientDashboardDataPromise) return clientDashboardDataPromise;
+  const cacheKey = locationId || 'all';
+  if (clientDashboardDataCache && clientDashboardDataCache._key === cacheKey) {
+    return clientDashboardDataCache;
+  }
+  if (clientDashboardDataPromiseMap[cacheKey]) {
+    return clientDashboardDataPromiseMap[cacheKey];
+  }
 
-  clientDashboardDataPromise = fetch('/api/dashboard/data')
+  const url = locationId ? `/api/dashboard/data?locationId=${locationId}` : '/api/dashboard/data';
+  const promise = fetch(url)
     .then(res => {
       if (!res.ok) throw new Error('Failed to fetch dashboard data');
       return res.json();
     })
     .then(data => {
+      data._key = cacheKey;
       clientDashboardDataCache = data;
-      clientDashboardDataPromise = null;
+      clientDashboardDataPromiseMap[cacheKey] = null;
       return data;
     })
     .catch(err => {
       console.error(err);
-      clientDashboardDataPromise = null;
+      clientDashboardDataPromiseMap[cacheKey] = null;
       return null;
     });
 
-  return clientDashboardDataPromise;
+  clientDashboardDataPromiseMap[cacheKey] = promise;
+  return promise;
 }
 
 let clientBusinessCache: any = null;
@@ -42,7 +50,7 @@ export function invalidateBusinessCache() {
   clientBusinessCache = null;
   clientBusinessPromise = null;
   clientDashboardDataCache = null;
-  clientDashboardDataPromise = null;
+  clientDashboardDataPromiseMap = {};
 }
 
 async function fetchClientBusiness() {
@@ -107,7 +115,9 @@ export interface Business {
   payment_amount?: number | null;
   payment_status?: 'paid' | 'unpaid' | 'due_soon';
   is_active: boolean;
+  hide_branding?: boolean;
   created_at: string;
+  location_id?: string | null;
 }
 
 export interface Review {
@@ -124,15 +134,126 @@ export interface Review {
   is_resolved: boolean;
   owner_note?: string;
   created_at: string;
+  location_id?: string | null;
 }
 
 // Cleaned up mock store for production deployment
 const mockBusinesses: Record<string, Business> = {};
-const mockReviews: Review[] = [];
-const mockScans: { scanned_at: string; scan_source: string }[] = [];
+const mockReviews: Review[] = [
+  {
+    id: 'rev-1',
+    business_id: 'b1111111-1111-1111-1111-111111111111',
+    stars: 5,
+    is_public: true,
+    custom_text: "Perfect tea! Vaishali Nagar branch is very clean and staff is polite.",
+    language_used: 'en',
+    is_resolved: false,
+    location_id: 'loc-1',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'rev-2',
+    business_id: 'b1111111-1111-1111-1111-111111111111',
+    stars: 3,
+    is_public: false,
+    private_feedback: "Malviya Nagar branch is crowded and waiting time is too long.",
+    customer_name: "Amit Sharma",
+    customer_phone: "+919876543211",
+    language_used: 'en',
+    is_resolved: false,
+    location_id: 'loc-2',
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'rev-3',
+    business_id: 'b1111111-1111-1111-1111-111111111111',
+    stars: 5,
+    is_public: true,
+    custom_text: "Excellent service and packaging. Best ginger chai in town!",
+    language_used: 'en',
+    is_resolved: false,
+    location_id: null,
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'rev-4',
+    business_id: 'b1111111-1111-1111-1111-111111111111',
+    stars: 1,
+    is_public: false,
+    private_feedback: "Rude staff at Vaishali counter, refused to take voucher.",
+    customer_name: "Rahul Verma",
+    customer_phone: "+919999888877",
+    language_used: 'en',
+    is_resolved: false,
+    location_id: 'loc-1',
+    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'rev-5',
+    business_id: 'b1111111-1111-1111-1111-111111111111',
+    stars: 4,
+    is_public: true,
+    custom_text: "Nice tea, great atmosphere at Malviya Nagar branch.",
+    language_used: 'en',
+    is_resolved: false,
+    location_id: 'loc-2',
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+  }
+];
+const mockScans: { scanned_at: string; scan_source: string; location_id?: string | null }[] = [];
+// Self-executing setup to seed random scans over the last 30 days
+(() => {
+  const sources = ['qr', 'nfc', 'link', 'whatsapp'];
+  const locations = ['loc-1', 'loc-2', null];
+  const now = Date.now();
+  for (let i = 0; i < 150; i++) {
+    const randomDaysAgo = Math.random() * 30;
+    const scanned_at = new Date(now - randomDaysAgo * 24 * 60 * 60 * 1000).toISOString();
+    const scan_source = sources[Math.floor(Math.random() * sources.length)];
+    const location_id = locations[Math.floor(Math.random() * locations.length)];
+    mockScans.push({ scanned_at, scan_source, location_id });
+  }
+})();
 
 export async function getBusinessBySlug(slug: string): Promise<Business | null> {
   if (isMockMode) {
+    // Check if the slug is a mock location
+    const mockLoc = mockLocations.find(l => l.slug === slug);
+    if (mockLoc) {
+      const parentBusiness = mockBusinesses['chai-point-jaipur-a3f2'] || {
+        id: mockLoc.business_id,
+        owner_id: 'mock-owner',
+        name: 'Chai Point',
+        slug: 'chai-point-jaipur-a3f2',
+        google_place_id: 'ChIJ-mock-place-id',
+        google_review_url: 'https://search.google.com/local/writereview?placeid=ChIJ-mock-place-id',
+        logo_url: null,
+        brand_color: '#059669',
+        tagline: 'We value your honest feedback!',
+        category: 'restaurant',
+        language: 'en',
+        plan: 'growth',
+        trial_started_at: new Date().toISOString(),
+        trial_ended: false,
+        whatsapp_number: '+919876543210',
+        notification_email: 'owner@example.com',
+        nfc_enabled: true,
+        is_active: true,
+        hide_branding: false,
+        created_at: new Date().toISOString()
+      };
+
+      return {
+        ...parentBusiness,
+        name: `${parentBusiness.name} - ${mockLoc.name.replace('Branch - ', '')}`,
+        google_place_id: mockLoc.google_place_id,
+        google_review_url: mockLoc.google_review_url,
+        is_active: parentBusiness.is_active && mockLoc.is_active,
+        slug: mockLoc.slug,
+        location_id: mockLoc.id
+      };
+    }
+
     if (!mockBusinesses[slug]) {
       mockBusinesses[slug] = {
         id: `b1111111-1111-1111-1111-111111111111`, // keep it matched for mock data
@@ -153,6 +274,7 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
         notification_email: 'owner@example.com',
         nfc_enabled: true,
         is_active: !slug.includes('inactive'),
+        hide_branding: false,
         created_at: new Date().toISOString()
       };
     }
@@ -160,17 +282,51 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
   }
 
   const supabase = getSupabaseClient();
-  const { data, error } = await supabase
+  
+  // 1. Try finding in businesses table
+  const { data: businessData, error: businessError } = await supabase
     .from('businesses')
     .select('*')
     .eq('slug', slug)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    console.error('Error fetching business by slug:', error);
-    return null;
+  if (businessData) {
+    return businessData as Business;
   }
-  return data as Business;
+
+  // 2. If not found, try finding in locations table
+  const { data: locationData, error: locationError } = await supabase
+    .from('locations')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (locationData) {
+    // Fetch parent business
+    const { data: parentData, error: parentError } = await supabase
+      .from('businesses')
+      .select('*')
+      .eq('id', locationData.business_id)
+      .single();
+
+    if (parentData) {
+      return {
+        ...parentData,
+        name: `${parentData.name} - ${locationData.name}`,
+        google_place_id: locationData.google_place_id,
+        google_review_url: locationData.google_review_url,
+        is_active: parentData.is_active && locationData.is_active,
+        slug: locationData.slug,
+        location_id: locationData.id
+      } as Business;
+    }
+  }
+
+  if (businessError || locationError) {
+    console.error('Error fetching by slug:', businessError || locationError);
+  }
+
+  return null;
 }
 
 export async function getFirstBusinessForOwner(ownerId: string): Promise<Business | null> {
@@ -200,11 +356,12 @@ export async function getFirstBusinessForOwner(ownerId: string): Promise<Busines
   return data as Business;
 }
 
-export async function logScan(businessId: string, scanSource: 'qr' | 'nfc' | 'link' | 'whatsapp', userAgent?: string, referrer?: string): Promise<boolean> {
+export async function logScan(businessId: string, scanSource: 'qr' | 'nfc' | 'link' | 'whatsapp', userAgent?: string, referrer?: string, locationId?: string): Promise<boolean> {
   if (isMockMode) {
     mockScans.push({
       scanned_at: new Date().toISOString(),
-      scan_source: scanSource
+      scan_source: scanSource,
+      location_id: locationId || null
     });
     return true;
   }
@@ -216,7 +373,8 @@ export async function logScan(businessId: string, scanSource: 'qr' | 'nfc' | 'li
       business_id: businessId,
       scan_source: scanSource,
       user_agent: userAgent || null,
-      referrer: referrer || null
+      referrer: referrer || null,
+      location_id: locationId || null
     });
 
   if (error) {
@@ -265,7 +423,8 @@ export async function createReview(reviewData: Partial<Review>): Promise<Review 
     custom_text: reviewData.custom_text,
     language_used: reviewData.language_used || 'en',
     is_resolved: false,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    location_id: reviewData.location_id || null
   };
 
   if (isMockMode) {
@@ -340,19 +499,30 @@ export async function createBusiness(businessData: Partial<Business>): Promise<B
 }
 
 // Phase 2: Summary metrics getter
-export async function getDashboardSummary(businessId: string) {
+export async function getDashboardSummary(businessId: string, locationId?: string) {
   if (isMockMode) {
-    const totalScans = mockScans.length;
-    const totalReviews = mockReviews.length;
+    let filteredReviews = mockReviews;
+    let filteredScans = mockScans;
+    if (locationId) {
+      if (locationId === 'main') {
+        filteredReviews = mockReviews.filter(r => !r.location_id);
+        filteredScans = mockScans.filter(s => !s.location_id);
+      } else {
+        filteredReviews = mockReviews.filter(r => r.location_id === locationId);
+        filteredScans = mockScans.filter(s => s.location_id === locationId);
+      }
+    }
+    const totalScans = filteredScans.length;
+    const totalReviews = filteredReviews.length;
     
     let sum = 0;
-    mockReviews.forEach(r => sum += r.stars);
+    filteredReviews.forEach(r => sum += r.stars);
     const averageStars = totalReviews > 0 ? parseFloat((sum / totalReviews).toFixed(1)) : 0.0;
     
-    const publicCount = mockReviews.filter(r => r.is_public).length;
+    const publicCount = filteredReviews.filter(r => r.is_public).length;
     const redirectRate = totalReviews > 0 ? Math.round((publicCount / totalReviews) * 100) : 0;
     
-    const unresolvedFeedbackCount = mockReviews.filter(r => !r.is_public && !r.is_resolved).length;
+    const unresolvedFeedbackCount = filteredReviews.filter(r => !r.is_public && !r.is_resolved).length;
     
     return {
       totalScans,
@@ -364,16 +534,33 @@ export async function getDashboardSummary(businessId: string) {
   }
 
   if (typeof window !== 'undefined') {
-    const data = await fetchClientDashboardData();
+    const data = await fetchClientDashboardData(locationId);
     return data ? data.summary : { totalScans: 0, totalReviews: 0, averageStars: 0.0, redirectRate: 0, unresolvedFeedbackCount: 0 };
   }
 
   const supabase = getSupabaseClient();
   
   // Total scans
-  const { count: scansCount } = await supabase.from('qr_scans').select('*', { count: 'exact', head: true }).eq('business_id', businessId);
+  let scansQuery = supabase.from('qr_scans').select('*', { count: 'exact', head: true }).eq('business_id', businessId);
+  if (locationId) {
+    if (locationId === 'main') {
+      scansQuery = scansQuery.is('location_id', null);
+    } else {
+      scansQuery = scansQuery.eq('location_id', locationId);
+    }
+  }
+  const { count: scansCount } = await scansQuery;
+  
   // Reviews counts & average
-  const { data: reviewsData } = await supabase.from('reviews').select('stars, is_public, is_resolved').eq('business_id', businessId);
+  let reviewsQuery = supabase.from('reviews').select('stars, is_public, is_resolved').eq('business_id', businessId);
+  if (locationId) {
+    if (locationId === 'main') {
+      reviewsQuery = reviewsQuery.is('location_id', null);
+    } else {
+      reviewsQuery = reviewsQuery.eq('location_id', locationId);
+    }
+  }
+  const { data: reviewsData } = await reviewsQuery;
   
   const totalScans = scansCount || 0;
   const totalReviews = reviewsData?.length || 0;
@@ -408,9 +595,10 @@ export async function getReviewsInbox(
     isPublic?: boolean;
     isResolved?: boolean;
     sort?: 'newest' | 'oldest' | 'stars_desc' | 'stars_asc';
+    locationId?: string;
   }
 ) {
-  const { search, stars, isPublic, isResolved, sort = 'newest' } = options;
+  const { search, stars, isPublic, isResolved, sort = 'newest', locationId } = options;
 
   if (isMockMode) {
     let filtered = [...mockReviews];
@@ -428,6 +616,15 @@ export async function getReviewsInbox(
     // Filter by rating
     if (stars !== undefined) {
       filtered = filtered.filter(r => r.stars === stars);
+    }
+
+    // Filter by location
+    if (locationId) {
+      if (locationId === 'main') {
+        filtered = filtered.filter(r => !r.location_id);
+      } else {
+        filtered = filtered.filter(r => r.location_id === locationId);
+      }
     }
 
     // Filter by search string
@@ -462,6 +659,7 @@ export async function getReviewsInbox(
     if (isPublic !== undefined) params.append('isPublic', isPublic.toString());
     if (isResolved !== undefined) params.append('isResolved', isResolved.toString());
     if (sort) params.append('sort', sort);
+    if (locationId) params.append('locationId', locationId);
 
     const res = await fetch(`/api/dashboard/reviews?${params.toString()}`);
     if (!res.ok) return [];
@@ -479,6 +677,13 @@ export async function getReviewsInbox(
   }
   if (stars !== undefined) {
     query = query.eq('stars', stars);
+  }
+  if (locationId) {
+    if (locationId === 'main') {
+      query = query.is('location_id', null);
+    } else {
+      query = query.eq('location_id', locationId);
+    }
   }
   if (search) {
     query = query.or(`custom_text.ilike.%${search}%,private_feedback.ilike.%${search}%,customer_name.ilike.%${search}%,customer_phone.ilike.%${search}%`);
@@ -566,7 +771,7 @@ export async function updateBusinessSettings(businessId: string, data: Partial<B
 }
 
 // Phase 2: Analytics daily scans
-export async function getAnalyticsDailyScans(businessId: string, days = 30) {
+export async function getAnalyticsDailyScans(businessId: string, days = 30, locationId?: string) {
   const datesMap: Record<string, number> = {};
   const now = new Date();
   
@@ -579,7 +784,15 @@ export async function getAnalyticsDailyScans(businessId: string, days = 30) {
   }
 
   if (isMockMode) {
-    mockScans.forEach(s => {
+    let filteredScans = mockScans;
+    if (locationId) {
+      if (locationId === 'main') {
+        filteredScans = mockScans.filter(s => !s.location_id);
+      } else {
+        filteredScans = mockScans.filter(s => s.location_id === locationId);
+      }
+    }
+    filteredScans.forEach(s => {
       const dateStr = s.scanned_at.split('T')[0];
       if (datesMap[dateStr] !== undefined) {
         datesMap[dateStr]++;
@@ -587,7 +800,7 @@ export async function getAnalyticsDailyScans(businessId: string, days = 30) {
     });
   } else {
     if (typeof window !== 'undefined') {
-      const data = await fetchClientDashboardData();
+      const data = await fetchClientDashboardData(locationId);
       return data ? data.dailyScans : [];
     }
 
@@ -595,11 +808,21 @@ export async function getAnalyticsDailyScans(businessId: string, days = 30) {
     const startDate = new Date();
     startDate.setDate(now.getDate() - days);
     
-    const { data } = await supabase
+    let query = supabase
       .from('qr_scans')
       .select('scanned_at')
       .eq('business_id', businessId)
       .gte('scanned_at', startDate.toISOString());
+
+    if (locationId) {
+      if (locationId === 'main') {
+        query = query.is('location_id', null);
+      } else {
+        query = query.eq('location_id', locationId);
+      }
+    }
+
+    const { data } = await query;
 
     data?.forEach(s => {
       const dateStr = s.scanned_at.split('T')[0];
@@ -616,24 +839,42 @@ export async function getAnalyticsDailyScans(businessId: string, days = 30) {
 }
 
 // Phase 2: Star distribution counts
-export async function getStarDistribution(businessId: string) {
+export async function getStarDistribution(businessId: string, locationId?: string) {
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
   if (isMockMode) {
-    mockReviews.forEach(r => {
+    let filteredReviews = mockReviews;
+    if (locationId) {
+      if (locationId === 'main') {
+        filteredReviews = mockReviews.filter(r => !r.location_id);
+      } else {
+        filteredReviews = mockReviews.filter(r => r.location_id === locationId);
+      }
+    }
+    filteredReviews.forEach(r => {
       distribution[r.stars]++;
     });
   } else {
     if (typeof window !== 'undefined') {
-      const data = await fetchClientDashboardData();
+      const data = await fetchClientDashboardData(locationId);
       return data ? data.starBreakdown : [];
     }
 
     const supabase = getSupabaseClient();
-    const { data } = await supabase
+    let query = supabase
       .from('reviews')
       .select('stars')
       .eq('business_id', businessId);
+
+    if (locationId) {
+      if (locationId === 'main') {
+        query = query.is('location_id', null);
+      } else {
+        query = query.eq('location_id', locationId);
+      }
+    }
+
+    const { data } = await query;
 
     data?.forEach(r => {
       if (distribution[r.stars] !== undefined) {
@@ -649,11 +890,19 @@ export async function getStarDistribution(businessId: string) {
 }
 
 // Phase 2: Scan source breakdown counts
-export async function getScanSourceBreakdown(businessId: string) {
+export async function getScanSourceBreakdown(businessId: string, locationId?: string) {
   const breakdown: Record<string, number> = { qr: 0, nfc: 0, link: 0, whatsapp: 0 };
 
   if (isMockMode) {
-    mockScans.forEach(s => {
+    let filteredScans = mockScans;
+    if (locationId) {
+      if (locationId === 'main') {
+        filteredScans = mockScans.filter(s => !s.location_id);
+      } else {
+        filteredScans = mockScans.filter(s => s.location_id === locationId);
+      }
+    }
+    filteredScans.forEach(s => {
       const src = s.scan_source;
       if (breakdown[src] !== undefined) {
         breakdown[src]++;
@@ -661,15 +910,25 @@ export async function getScanSourceBreakdown(businessId: string) {
     });
   } else {
     if (typeof window !== 'undefined') {
-      const data = await fetchClientDashboardData();
+      const data = await fetchClientDashboardData(locationId);
       return data ? data.sourceBreakdown : [];
     }
 
     const supabase = getSupabaseClient();
-    const { data } = await supabase
+    let query = supabase
       .from('qr_scans')
       .select('scan_source')
       .eq('business_id', businessId);
+
+    if (locationId) {
+      if (locationId === 'main') {
+        query = query.is('location_id', null);
+      } else {
+        query = query.eq('location_id', locationId);
+      }
+    }
+
+    const { data } = await query;
 
     data?.forEach(s => {
       const src = s.scan_source;
@@ -686,12 +945,20 @@ export async function getScanSourceBreakdown(businessId: string) {
 }
 
 // Phase 2: Peak scans hourly heatmap
-export async function getPeakScansHeatmap(businessId: string) {
+export async function getPeakScansHeatmap(businessId: string, locationId?: string) {
   // Array matrix: 7 days of week (0=Sun...6=Sat) x 24 hours of day
   const heatmap = Array(7).fill(0).map(() => Array(24).fill(0));
 
   if (isMockMode) {
-    mockScans.forEach(s => {
+    let filteredScans = mockScans;
+    if (locationId) {
+      if (locationId === 'main') {
+        filteredScans = mockScans.filter(s => !s.location_id);
+      } else {
+        filteredScans = mockScans.filter(s => s.location_id === locationId);
+      }
+    }
+    filteredScans.forEach(s => {
       const d = new Date(s.scanned_at);
       const day = d.getDay();
       const hour = d.getHours();
@@ -699,10 +966,16 @@ export async function getPeakScansHeatmap(businessId: string) {
     });
   } else {
     const supabase = getSupabaseClient();
-    const { data } = await supabase
+    let query = supabase
       .from('qr_scans')
       .select('scanned_at')
       .eq('business_id', businessId);
+
+    if (locationId) {
+      query = query.eq('location_id', locationId);
+    }
+
+    const { data } = await query;
 
     data?.forEach(s => {
       const d = new Date(s.scanned_at);

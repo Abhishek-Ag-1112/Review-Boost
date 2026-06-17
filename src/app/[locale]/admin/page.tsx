@@ -437,14 +437,14 @@ export default function AdminControlPanel({ params }: { params: { locale: string
             <table className="w-full text-left border-collapse min-w-[1100px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80">
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Merchant</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Plan</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Expired</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Payment</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Due Date</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[200px]">Merchant</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[120px]">Plan</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center min-w-[80px]">Expired</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[120px]">Status</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[120px]">Payment</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[100px]">Amount</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[140px]">Due Date</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -839,8 +839,8 @@ export default function AdminControlPanel({ params }: { params: { locale: string
                 { feature: 'AI Suggestions', free: true, starter: true, growth: true },
                 { feature: 'WhatsApp/Email Alerts', free: true, starter: true, growth: true },
                 { feature: 'Multi-Language', free: false, starter: true, growth: true },
-                { feature: 'Multiple Locations', free: false, starter: false, growth: true },
-                { feature: 'NFC Cards (10)', free: false, starter: false, growth: true },
+                { feature: 'Multiple Locations (3)', free: false, starter: false, growth: true },
+                { feature: 'NFC Cards (3)', free: false, starter: false, growth: true },
                 { feature: 'Peak Scan Heatmap', free: false, starter: false, growth: true },
                 { feature: 'Developer API', free: false, starter: false, growth: true },
                 { feature: 'White-label', free: false, starter: false, growth: true },
@@ -952,13 +952,13 @@ export default function AdminControlPanel({ params }: { params: { locale: string
             <table className="w-full text-left border-collapse min-w-[900px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/80">
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Merchant</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Plan</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Requested Plan</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[200px]">Merchant</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[120px]">Current Plan</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[120px]">Requested Plan</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[180px]">Contact</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[110px]">Date</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[110px]">Status</th>
+                  <th className="py-3.5 px-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right min-w-[100px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">

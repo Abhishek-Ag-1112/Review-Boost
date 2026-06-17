@@ -97,7 +97,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         businessId: business.id,
-        scanSource: source
+        scanSource: source,
+        locationId: (business as any).location_id || null
       })
     }).catch((err) => console.error('Failed to log scan:', err));
   }, [business.id]);
@@ -175,7 +176,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
           isPublic: true,
           aiSuggestionUsed: isSkip ? '' : suggestionUsed,
           customText: finalReviewText,
-          languageUsed: currentLocale
+          languageUsed: currentLocale,
+          locationId: (business as any).location_id || null
         })
       }).catch((err) => console.error('Error saving review in background:', err));
 
@@ -232,7 +234,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
           privateFeedback,
           customerName,
           customerPhone,
-          languageUsed: currentLocale
+          languageUsed: currentLocale,
+          locationId: (business as any).location_id || null
         })
       });
 
@@ -267,9 +270,10 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
       >
         {/* Header bar with Language Toggle */}
         <div className="flex justify-between items-center px-6 py-4 bg-slate-50 border-b border-slate-100">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            ReviewPe Funnel
-          </span>
+          <div className="flex items-center gap-1.5 select-none">
+            <img src="/icon.png" alt="ReviewPe Icon" className="w-6 h-6 object-contain rounded-md" />
+            <span className="font-extrabold text-slate-800 tracking-tight text-sm">Review<span className="text-emerald-600">Pe</span></span>
+          </div>
           {/* Language selector toggle */}
           {business.plan !== 'free' && (
             <div className="relative group">
@@ -507,7 +511,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         </div>
 
         {/* Footer Powered By */}
-        {business.plan !== 'growth' && (
+        {!(business.plan === 'growth' && business.hide_branding) && (
           <div className="py-3 bg-slate-50 border-t border-slate-100 text-center">
             <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">
               Powered by ReviewPe

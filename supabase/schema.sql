@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   is_active BOOLEAN DEFAULT true,
   trial_started_at TIMESTAMPTZ DEFAULT now(),
   trial_ended BOOLEAN DEFAULT false,
+  hide_branding BOOLEAN DEFAULT false,
 
   -- Payment tracking (manual billing model)
   payment_status TEXT DEFAULT 'paid' CHECK (payment_status IN ('paid', 'due_soon', 'unpaid')),
@@ -271,6 +272,10 @@ CREATE POLICY "locations_owner" ON public.locations
     business_id IN (SELECT id FROM public.businesses WHERE owner_id = auth.uid()::text)
     OR public.is_admin()
   );
+
+-- Locations: public read (needed for resolving branch slugs on customer facing pages)
+CREATE POLICY "locations_public_read" ON public.locations
+  FOR SELECT USING (true);
 
 -- NFC Cards: owner only
 CREATE POLICY "nfc_cards_owner" ON public.nfc_cards
