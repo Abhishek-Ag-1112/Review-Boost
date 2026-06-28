@@ -356,7 +356,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
               </h2>
 
               {/* Suggestions Engine */}
-              {business.plan !== 'free' && (
+              {true && (
                 <div className="mb-4">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--brand)] mb-2.5">
                     <Sparkles className="w-4 h-4" />
