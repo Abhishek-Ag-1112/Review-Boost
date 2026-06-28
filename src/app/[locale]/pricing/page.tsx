@@ -61,8 +61,8 @@ export default function PricingPage({ params }: PricingPageProps) {
     { name: "Email + WhatsApp Alerts", starter: true, growth: true }
   ];
 
-  const supportEmail = 'billing@reviewpe.online';
-  const supportPhone = '+919876543210';
+  const supportEmail = 'abhishek040478@gmail.com';
+  const supportPhone = '+918829095225';
   const starterText = funnelType === 'smart' 
     ? "Hello Support, I would like to subscribe to the Starter Plan (₹399/mo) after my free plan period."
     : "Hello Support, I would like to subscribe to the Starter Direct Plan (₹399/mo) after my free plan period.";

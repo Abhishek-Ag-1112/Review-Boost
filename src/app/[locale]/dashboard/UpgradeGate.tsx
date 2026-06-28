@@ -22,8 +22,8 @@ export default function UpgradeGate({
     growth: 'Growth Plan'
   };
 
-  const supportEmail = 'billing@reviewpe.online';
-  const supportPhone = '+919876543210'; // Support number
+  const supportEmail = 'abhishek040478@gmail.com';
+  const supportPhone = '+918829095225'; // Support number
 
   const messageText = `Hello ReviewPe Support, I would like to manually upgrade my business "${businessName}" from the ${currentPlan} tier to the ${planTitles[planNeeded]}. Please coordinate the invoice and activation.`;
   

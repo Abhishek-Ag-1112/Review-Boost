@@ -81,8 +81,8 @@ export default function BillingPage({ params }: BillingPageProps) {
   const remainingDays = Math.max(0, 30 - elapsedDays);
   const trialProgress = Math.min(100, Math.round((elapsedDays / 30) * 100));
 
-  const supportEmail = 'billing@reviewpe.online';
-  const supportPhone = '+919876543210';
+  const supportEmail = 'abhishek040478@gmail.com';
+  const supportPhone = '+918829095225';
 
   const planLabels: Record<string, string> = {
     free: 'Free Trial',
