@@ -102,6 +102,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         locationId: (business as any).location_id || null
       })
     }).catch((err) => console.error('Failed to log scan:', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [business.id]);
 
   // 2. Fetch AI Suggestions on Happy Path selection

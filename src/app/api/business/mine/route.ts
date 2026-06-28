@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+
+export const dynamic = 'force-dynamic';
 import { verifyFirebaseSession } from '@/lib/firebase-admin';
 import { getFirstBusinessForOwner } from '@/lib/db';
 
