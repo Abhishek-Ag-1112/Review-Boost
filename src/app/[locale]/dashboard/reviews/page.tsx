@@ -55,6 +55,14 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
     };
   }, [search]);
 
+  const isDirectPlan = business?.plan === 'starter_direct' || business?.plan === 'growth_direct' || business?.plan === 'free_direct';
+
+  useEffect(() => {
+    if (business && (business.plan === 'starter_direct' || business.plan === 'growth_direct' || business.plan === 'free_direct')) {
+      setActiveTab('public');
+    }
+  }, [business]);
+
   useEffect(() => {
     setMounted(true);
     getFirstBusinessForOwner('mock-owner')
@@ -179,7 +187,11 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Reviews Inbox</h1>
-          <p className="text-sm text-slate-500 font-semibold mt-1">Review public submissions and follow up on private customer ratings.</p>
+          <p className="text-sm text-slate-500 font-semibold mt-1">
+            {isDirectPlan 
+              ? "Review public submissions and customer ratings." 
+              : "Review public submissions and follow up on private customer ratings."}
+          </p>
         </div>
 
         <button
@@ -193,28 +205,30 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
       </div>
 
       {/* Tabs Row */}
-      <div className="border-b border-slate-100 flex gap-4">
-        <button
-          onClick={() => {
-            setActiveTab('public');
-            setStarFilter(undefined);
-            setResolvedFilter(undefined);
-          }}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'public' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
-        >
-          Google Reviews (4-5★)
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('private');
-            setStarFilter(undefined);
-            setResolvedFilter(undefined);
-          }}
-          className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'private' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
-        >
-          Private Feedback (1-3★)
-        </button>
-      </div>
+      {!isDirectPlan && (
+        <div className="border-b border-slate-100 flex gap-4">
+          <button
+            onClick={() => {
+              setActiveTab('public');
+              setStarFilter(undefined);
+              setResolvedFilter(undefined);
+            }}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'public' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+          >
+            Google Reviews (4-5★)
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('private');
+              setStarFilter(undefined);
+              setResolvedFilter(undefined);
+            }}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === 'private' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-700'}`}
+          >
+            Private Feedback (1-3★)
+          </button>
+        </div>
+      )}
 
       {/* Filters Control Box */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
@@ -232,7 +246,7 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
 
         {/* Branch / Location filter */}
         <div className="relative">
-          {business?.plan === 'growth' ? (
+          {business?.plan === 'growth' || business?.plan === 'growth_direct' ? (
             <select
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
@@ -263,7 +277,15 @@ export default function ReviewsInbox({ params }: { params: { locale: string } })
             className="w-full text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent bg-white cursor-pointer"
           >
             <option value="">All Ratings</option>
-            {activeTab === 'public' ? (
+            {isDirectPlan ? (
+              <>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </>
+            ) : activeTab === 'public' ? (
               <>
                 <option value="5">5 Stars</option>
                 <option value="4">4 Stars</option>

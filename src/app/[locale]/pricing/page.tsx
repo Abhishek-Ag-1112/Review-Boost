@@ -15,15 +15,21 @@ export default function PricingPage({ params }: PricingPageProps) {
 
   // Accordion state
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  // Toggle State: 'smart' | 'direct'
+  const [funnelType, setFunnelType] = useState<'smart' | 'direct'>('smart');
 
   const faqItems = [
+    {
+      q: "What is the difference between Smart and Direct Funnels?",
+      a: "The Smart Funnel routes 4-5 star reviews directly to Google, while collecting 1-3 star reviews privately to protect your reputation. The Direct Funnel bypasses the private form entirely and sends all star ratings directly to Google Maps."
+    },
     {
       q: "What is your cancellation policy?",
       a: "ReviewPe has no long-term contracts. You can cancel your subscription renewal at any time. Simply contact the support admin or pause your manual renewal, and your account will gracefully transition to the inactive status without any exit fees or penalties."
     },
     {
       q: "Can I switch between plans?",
-      a: "Yes! You can request a switch between Starter and Growth at any point. Our administrator will manually adjust your limits, update the billing records, and instantly apply the corresponding features to your merchant profile."
+      a: "Yes! You can request a switch between Starter and Growth (including standard/direct models) at any point. Our administrator will manually adjust your limits, update the billing records, and instantly apply the corresponding features to your merchant profile."
     },
     {
       q: "Do you support UPI payments?",
@@ -44,16 +50,25 @@ export default function PricingPage({ params }: PricingPageProps) {
     { name: "CSV Export (Scan & Feedback Logs)", starter: false, growth: true },
     { name: "White-label Options (Remove Brand)", starter: false, growth: true },
     { name: "Public Developer API Access", starter: false, growth: true },
-    { name: "Smart Review Routing (4-5★ to Google)", starter: true, growth: true },
+    ...(funnelType === 'smart' ? [
+      { name: "Smart Review Routing (4-5★ to Google)", starter: true, growth: true },
+      { name: "Private Feedback Form (1-3★)", starter: true, growth: true },
+    ] : [
+      { name: "Direct Google Reviews (All 1-5★)", starter: true, growth: true },
+      { name: "Private Feedback Form (1-3★)", starter: false, growth: false },
+    ]),
     { name: "AI Review Suggestions (Claude-powered)", starter: true, growth: true },
-    { name: "Private Feedback Form (1-3★)", starter: true, growth: true },
     { name: "Email + WhatsApp Alerts", starter: true, growth: true }
   ];
 
   const supportEmail = 'billing@reviewpe.online';
   const supportPhone = '+919876543210';
-  const starterText = "Hello Support, I would like to subscribe to the Starter Plan (₹399/mo) after my free plan period.";
-  const growthText = "Hello Support, I would like to subscribe to the Growth Plan (₹799/mo) after my free plan period.";
+  const starterText = funnelType === 'smart' 
+    ? "Hello Support, I would like to subscribe to the Starter Plan (₹399/mo) after my free plan period."
+    : "Hello Support, I would like to subscribe to the Starter Direct Plan (₹399/mo) after my free plan period.";
+  const growthText = funnelType === 'smart'
+    ? "Hello Support, I would like to subscribe to the Growth Plan (₹799/mo) after my free plan period."
+    : "Hello Support, I would like to subscribe to the Growth Direct Plan (₹799/mo) after my free plan period.";
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-800 font-sans antialiased relative overflow-hidden pb-20">
@@ -92,6 +107,24 @@ export default function PricingPage({ params }: PricingPageProps) {
         </p>
       </section>
 
+      {/* Funnel Type Selector Toggle */}
+      <div className="flex justify-center mb-12 px-6">
+        <div className="bg-slate-100 p-1 rounded-2xl inline-flex border border-slate-200 shadow-inner flex-wrap justify-center gap-1">
+          <button
+            onClick={() => setFunnelType('smart')}
+            className={`px-5 py-2.5 rounded-xl text-[10px] font-black transition-all ${funnelType === 'smart' ? 'bg-white text-emerald-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Smart Funnel (Filters Negative Reviews)
+          </button>
+          <button
+            onClick={() => setFunnelType('direct')}
+            className={`px-5 py-2.5 rounded-xl text-[10px] font-black transition-all ${funnelType === 'direct' ? 'bg-white text-indigo-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Direct Funnel (Direct Google Reviews)
+          </button>
+        </div>
+      </div>
+
       {/* Side-by-Side Comparison Matrix Cards */}
       <section className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 mb-20">
         
@@ -100,16 +133,21 @@ export default function PricingPage({ params }: PricingPageProps) {
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                STARTER PLAN
+                {funnelType === 'smart' ? 'STARTER PLAN' : 'STARTER DIRECT PLAN'}
               </span>
               <span className="text-[10px] font-black text-emerald-700 bg-emerald-55/50 px-2.5 py-1 rounded-lg border border-emerald-100 uppercase tracking-wide shadow-sm">
                 First month FREE ✓
               </span>
             </div>
             
-            <h3 className="text-3xl font-black text-slate-900 mt-4">STARTER</h3>
+            <h3 className="text-3xl font-black text-slate-900 mt-4">
+              {funnelType === 'smart' ? 'STARTER' : 'STARTER DIRECT'}
+            </h3>
             <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
-              Perfect for single physical shops, cafes, local clinics, and independent service providers.
+              {funnelType === 'smart' 
+                ? "Perfect for single physical shops, cafes, local clinics, and independent service providers."
+                : "Perfect for single shops looking to route all customer ratings directly to Google Maps."
+              }
             </p>
             
             <div className="my-8 flex items-baseline">
@@ -141,8 +179,25 @@ export default function PricingPage({ params }: PricingPageProps) {
                 <div className="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-650">Smart QR Routing (4-5★ → Google)</span>
+                <span className="text-xs font-bold text-slate-650">
+                  {funnelType === 'smart' ? 'Smart QR Routing (4-5★ → Google)' : 'Direct Google Reviews (All 1-5★)'}
+                </span>
               </div>
+              {funnelType === 'smart' ? (
+                <div className="flex items-start gap-3">
+                  <div className="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <Check className="w-3.5 h-3.5 stroke-[3px]" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-650">Private Feedback Form (1-3★)</span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-3">
+                  <div className="w-5.5 h-5.5 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <X className="w-3.5 h-3.5 stroke-[3px]" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-400 line-through">Private Feedback Form (1-3★)</span>
+                </div>
+              )}
               <div className="flex items-start gap-3">
                 <div className="w-5.5 h-5.5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
@@ -182,16 +237,21 @@ export default function PricingPage({ params }: PricingPageProps) {
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black text-indigo-650 uppercase tracking-widest">
-                GROWTH PLAN
+                {funnelType === 'smart' ? 'GROWTH PLAN' : 'GROWTH DIRECT PLAN'}
               </span>
               <span className="text-[10px] font-black text-indigo-705 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 uppercase tracking-wide shadow-sm">
                 First month FREE ✓
               </span>
             </div>
             
-            <h3 className="text-3xl font-black text-slate-900 mt-4">GROWTH</h3>
+            <h3 className="text-3xl font-black text-slate-900 mt-4">
+              {funnelType === 'smart' ? 'GROWTH' : 'GROWTH DIRECT'}
+            </h3>
             <p className="text-xs font-semibold text-slate-400 mt-2 leading-relaxed">
-              Ideal for multi-location outlets, restaurant chains, clinics, and professional agencies.
+              {funnelType === 'smart' 
+                ? "Ideal for multi-location outlets, restaurant chains, clinics, and professional agencies."
+                : "Ideal for multi-location outlets looking to route all customer ratings directly to Google Maps."
+              }
             </p>
             
             <div className="my-8 flex items-baseline">
@@ -202,40 +262,40 @@ export default function PricingPage({ params }: PricingPageProps) {
             {/* Features list */}
             <div className="border-t border-slate-100 pt-8 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">Up to 3 Locations & NFC Cards</span>
+                <span className="text-xs font-bold text-slate-705">Up to 3 Locations & NFC Cards</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">3-Month Analytics History</span>
+                <span className="text-xs font-bold text-slate-705">3-Month Analytics History</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">Scan & Peak Time Heatmaps</span>
+                <span className="text-xs font-bold text-slate-705">Scan & Peak Time Heatmaps</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">CSV Export (Logs & Feedbacks)</span>
+                <span className="text-xs font-bold text-slate-705">CSV Export (Logs & Feedbacks)</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">White-label Toggles (No Branding)</span>
+                <span className="text-xs font-bold text-slate-705">White-label Toggles (No Branding)</span>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-605 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="w-5.5 h-5.5 rounded-full bg-indigo-50 text-indigo-655 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                   <Check className="w-3.5 h-3.5 stroke-[3px]" />
                 </div>
-                <span className="text-xs font-bold text-slate-700">Public Developer API Access</span>
+                <span className="text-xs font-bold text-slate-705">Public Developer API Access</span>
               </div>
             </div>
           </div>
@@ -244,7 +304,7 @@ export default function PricingPage({ params }: PricingPageProps) {
           <div className="mt-10 pt-4 space-y-3">
             <Link
               href={`/${locale}/login`}
-              className="w-full inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 rounded-2xl text-xs text-center shadow-lg transition-all hover:shadow-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 active:scale-[0.99]"
+              className="w-full inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-750 text-white font-black py-4 px-6 rounded-2xl text-xs text-center shadow-lg transition-all hover:shadow-indigo-500/20 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 active:scale-[0.99]"
             >
               Log In to Subscribe
             </Link>
@@ -268,7 +328,7 @@ export default function PricingPage({ params }: PricingPageProps) {
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">
             Comparison Matrix
           </h2>
-          <p className="text-xs text-slate-400 font-semibold mt-1">
+          <p className="text-xs text-slate-450 font-semibold mt-1">
             Compare all options side-by-side to make the right choice.
           </p>
         </div>
@@ -278,9 +338,13 @@ export default function PricingPage({ params }: PricingPageProps) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-5 px-6 text-xs font-bold text-slate-450 uppercase tracking-wider min-w-[160px]">Features</th>
-                  <th className="py-5 px-6 text-xs font-black text-emerald-700 uppercase tracking-wider text-center w-40 min-w-[120px]">STARTER (₹399)</th>
-                  <th className="py-5 px-6 text-xs font-black text-indigo-750 uppercase tracking-wider text-center w-40 min-w-[120px]">GROWTH (₹799)</th>
+                  <th className="py-5 px-6 text-xs font-bold text-slate-455 uppercase tracking-wider min-w-[160px]">Features</th>
+                  <th className="py-5 px-6 text-xs font-black text-emerald-700 uppercase tracking-wider text-center w-48 min-w-[140px]">
+                    {funnelType === 'smart' ? 'STARTER (₹399)' : 'STARTER DIRECT (₹399)'}
+                  </th>
+                  <th className="py-5 px-6 text-xs font-black text-indigo-750 uppercase tracking-wider text-center w-48 min-w-[140px]">
+                    {funnelType === 'smart' ? 'GROWTH (₹799)' : 'GROWTH DIRECT (₹799)'}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

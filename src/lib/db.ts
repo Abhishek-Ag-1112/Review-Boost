@@ -92,7 +92,7 @@ export interface Business {
   tagline: string;
   category: 'restaurant' | 'retail' | 'salon' | 'clinic' | 'hotel' | 'other';
   language: string;
-  plan: 'free' | 'starter' | 'growth';
+  plan: 'free' | 'free_direct' | 'starter' | 'growth' | 'starter_direct' | 'growth_direct';
   trial_started_at: string;
   trial_ended: boolean;
   whatsapp_number: string | null;
@@ -267,7 +267,13 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
         tagline: 'We value your honest feedback!',
         category: 'restaurant',
         language: 'en',
-        plan: slug.includes('starter') ? 'starter' : 'growth',
+        plan: slug.includes('starter_direct')
+          ? 'starter_direct'
+          : slug.includes('growth_direct')
+          ? 'growth_direct'
+          : slug.includes('starter')
+          ? 'starter'
+          : 'growth',
         trial_started_at: new Date().toISOString(),
         trial_ended: false,
         whatsapp_number: '+919876543210',
@@ -1413,7 +1419,7 @@ export interface UpgradeRequest {
   business_id: string;
   business_name: string;
   current_plan: string;
-  requested_plan: 'free' | 'starter' | 'growth';
+  requested_plan: 'free' | 'starter' | 'growth' | 'starter_direct' | 'growth_direct';
   contact_email: string | null;
   contact_phone: string | null;
   status: 'pending' | 'approved' | 'rejected';
@@ -1427,7 +1433,7 @@ export async function createUpgradeRequest(data: {
   business_id: string;
   business_name: string;
   current_plan: string;
-  requested_plan: 'free' | 'starter' | 'growth';
+  requested_plan: 'free' | 'starter' | 'growth' | 'starter_direct' | 'growth_direct';
   contact_email?: string | null;
   contact_phone?: string | null;
 }): Promise<UpgradeRequest | null> {

@@ -358,9 +358,8 @@ export default function BusinessSettings({ params }: { params: { locale: string 
               </div>
             </div>
             
-            {/* White label toggle */}
             <div className="flex items-center pt-3 border-t border-slate-100 mt-4">
-              {business.plan === 'growth' ? (
+              {(business.plan === 'growth' || business.plan === 'growth_direct') ? (
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -716,7 +715,7 @@ export default function BusinessSettings({ params }: { params: { locale: string 
             Integrate your business reviews, traffic scans, and performance summary directly into external CRM or business intelligence tools.
           </p>
 
-          {business.plan === 'growth' ? (
+          {(business.plan === 'growth' || business.plan === 'growth_direct') ? (
             <div className="space-y-4">
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -904,7 +903,7 @@ export default function BusinessSettings({ params }: { params: { locale: string 
               )}
             </div>
             
-            {!(business.plan === 'growth' && hideBranding) && (
+            {!((business.plan === 'growth' || business.plan === 'growth_direct') && hideBranding) && (
               <div className="py-2.5 bg-slate-50 border-t border-slate-100 text-center">
                 <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase">Powered by ReviewPe</span>
               </div>

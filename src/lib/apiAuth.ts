@@ -35,7 +35,7 @@ export async function validatePublicApiRequest(req: NextRequest): Promise<AuthRe
   }
 
   // Gate check: Only Growth plan businesses can access public APIs
-  if (business.plan !== 'growth') {
+  if (business.plan !== 'growth' && business.plan !== 'growth_direct') {
     return {
       authorized: false,
       response: NextResponse.json(

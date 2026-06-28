@@ -74,8 +74,11 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
   const planLabels: Record<string, { label: string; style: string }> = {
     free: { label: 'Free Plan', style: 'bg-amber-50 text-amber-700 border-amber-100' },
+    free_direct: { label: 'Free Plan (Direct)', style: 'bg-amber-50 text-amber-700 border-amber-100' },
     starter: { label: 'Starter', style: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-    growth: { label: 'Growth', style: 'bg-indigo-50 text-indigo-700 border-indigo-100' }
+    starter_direct: { label: 'Starter (Direct)', style: 'bg-teal-50 text-teal-700 border-teal-100' },
+    growth: { label: 'Growth', style: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
+    growth_direct: { label: 'Growth (Direct)', style: 'bg-violet-50 text-violet-700 border-violet-100' }
   };
 
   const planDetails = business ? (planLabels[business.plan] || planLabels.free) : planLabels.free;
@@ -296,7 +299,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   let trialBanner: React.ReactNode = null;
   let trialExpiredBanner: React.ReactNode = null;
 
-  if (business && business.plan === 'free') {
+  if (business && (business.plan === 'free' || business.plan === 'free_direct')) {
     if (business.trial_ended) {
       trialExpiredBanner = (
         <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-rose-800">

@@ -69,13 +69,21 @@ export default function AdminControlPanel({ params }: { params: { locale: string
 
   const loadData = async () => {
     try {
-      const all = await getAllBusinesses();
+      const allRaw = await getAllBusinesses();
+      // Deduplicate businesses by ID to prevent React duplicate key issues
+      const businessMap = new Map<string, Business>();
+      allRaw.forEach(b => businessMap.set(b.id, b));
+      const all = Array.from(businessMap.values());
       setBusinesses(all);
 
       // Load reviews for all businesses
       const reviewPromises = all.map(b => getReviewsInbox(b.id, {}));
       const reviewResults = await Promise.all(reviewPromises);
-      const combined = reviewResults.flat();
+      const combinedRaw = reviewResults.flat();
+      // Deduplicate reviews by ID to prevent React duplicate key warnings
+      const reviewMap = new Map<string, Review>();
+      combinedRaw.forEach(r => reviewMap.set(r.id, r));
+      const combined = Array.from(reviewMap.values());
       setAllReviews(combined);
 
       // Load upgrade requests via API (server-side uses service_role, bypasses RLS)
@@ -111,7 +119,7 @@ export default function AdminControlPanel({ params }: { params: { locale: string
   // ═══════════════════════════════════════════
 
   const handleFieldChange = (id: string, field: keyof Business, value: any) => {
-    setBusinesses(businesses.map(b => b.id === id ? { ...b, [field]: value } : b));
+    setBusinesses(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
   };
 
   const handleSaveChanges = async (id: string) => {
@@ -158,8 +166,8 @@ export default function AdminControlPanel({ params }: { params: { locale: string
   const totalCount = businesses.length;
   const activeCount = businesses.filter(b => b.is_active).length;
   const freeCount = businesses.filter(b => b.plan === 'free').length;
-  const starterCount = businesses.filter(b => b.plan === 'starter').length;
-  const growthCount = businesses.filter(b => b.plan === 'growth').length;
+  const starterCount = businesses.filter(b => b.plan === 'starter' || b.plan === 'starter_direct').length;
+  const growthCount = businesses.filter(b => b.plan === 'growth' || b.plan === 'growth_direct').length;
   
   const pendingPayments = businesses.filter(b => 
     b.payment_status === 'unpaid' || b.payment_status === 'due_soon'
@@ -221,7 +229,9 @@ export default function AdminControlPanel({ params }: { params: { locale: string
     switch (plan) {
       case 'free': return 'bg-amber-50 text-amber-700 border-amber-200';
       case 'starter': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'starter_direct': return 'bg-teal-50 text-teal-700 border-teal-200';
       case 'growth': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'growth_direct': return 'bg-violet-50 text-violet-700 border-violet-200';
       default: return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
@@ -412,7 +422,9 @@ export default function AdminControlPanel({ params }: { params: { locale: string
           <option value="all">All Plans</option>
           <option value="free">Free</option>
           <option value="starter">Starter</option>
+          <option value="starter_direct">Starter Direct</option>
           <option value="growth">Growth</option>
+          <option value="growth_direct">Growth Direct</option>
         </select>
 
         <select
@@ -470,20 +482,23 @@ export default function AdminControlPanel({ params }: { params: { locale: string
                           <select
                             value={b.plan}
                             onChange={(e) => {
-                              const newPlan = e.target.value as 'free' | 'starter' | 'growth';
+                              const newPlan = e.target.value as any;
                               handleFieldChange(b.id, 'plan', newPlan);
-                              if (newPlan !== 'free') {
+                              if (newPlan !== 'free' && newPlan !== 'free_direct') {
                                 handleFieldChange(b.id, 'trial_ended', false);
                               }
                             }}
                             className="text-[10px] font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer w-24"
                           >
                             <option value="free">Free</option>
+                            <option value="free_direct">Free Direct</option>
                             <option value="starter">Starter</option>
+                            <option value="starter_direct">Starter Direct</option>
                             <option value="growth">Growth</option>
+                            <option value="growth_direct">Growth Direct</option>
                           </select>
                           
-                          {b.plan === 'free' && (
+                          {(b.plan === 'free' || b.plan === 'free_direct') && (
                             <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 rounded-lg px-1.5 py-0.5 w-24">
                               <Calendar className="w-2.5 h-2.5 text-slate-400 shrink-0" />
                               <input
@@ -1131,11 +1146,11 @@ export default function AdminControlPanel({ params }: { params: { locale: string
 
       {/* Tab Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {activeTab === 'dashboard' && <DashboardTab />}
-        {activeTab === 'businesses' && <BusinessesTab />}
-        {activeTab === 'reviews' && <ReviewsTab />}
-        {activeTab === 'upgrade_requests' && <UpgradeRequestsTab />}
-        {activeTab === 'settings' && <SettingsTab />}
+        {activeTab === 'dashboard' && DashboardTab()}
+        {activeTab === 'businesses' && BusinessesTab()}
+        {activeTab === 'reviews' && ReviewsTab()}
+        {activeTab === 'upgrade_requests' && UpgradeRequestsTab()}
+        {activeTab === 'settings' && SettingsTab()}
       </div>
     </div>
   );

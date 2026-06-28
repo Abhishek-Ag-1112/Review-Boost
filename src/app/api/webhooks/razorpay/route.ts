@@ -26,7 +26,8 @@ export async function POST(request: Request) {
     switch (event) {
       case 'payment.captured': {
         const amount = (eventPayload.payment.entity.amount || 39900) / 100; // in Rupees
-        const chosenPlan = amount >= 799 ? 'growth' : 'starter';
+        // Support custom plan in checkout notes, fallback to standard plans based on price
+        const chosenPlan = notes.plan || (amount >= 799 ? 'growth' : 'starter');
 
         console.log(`[Razorpay Webhook] Activating plan '${chosenPlan}' for: ${business.name} (Amount: ₹${amount})`);
         

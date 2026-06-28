@@ -1,9 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, ShieldCheck, QrCode, Star, Smartphone, RefreshCw, BarChart2 } from 'lucide-react';
 
 export default function MarketingPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
+  const [funnelType, setFunnelType] = useState<'smart' | 'direct'>('smart');
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between overflow-y-auto">
@@ -47,11 +50,11 @@ export default function MarketingPage({ params }: { params: { locale: string } }
         </span>
 
         <h1 className="text-4xl md:text-6xl font-black text-slate-950 tracking-tight max-w-3xl leading-tight">
-          Turn every happy customer into a <span className="text-emerald-600">Google review</span>
+          Supercharge your Google reviews with <span className="text-emerald-600">AI Suggestions</span>
         </h1>
         
         <p className="text-base md:text-lg text-slate-500 font-medium max-w-2xl mt-6 leading-relaxed">
-          A smart QR code review funnel that filters ratings: happy customers are directed to post on Google, while private feedback alerts you of issues before they go public.
+          Supercharge your review collection with smart QR codes. Empower customers to write detailed reviews in seconds using native-language AI suggestions, while private feedback protects your rating.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-10">
@@ -118,17 +121,40 @@ export default function MarketingPage({ params }: { params: { locale: string } }
               </p>
             </div>
 
+            {/* Funnel Type Selector Toggle */}
+            <div className="flex justify-center my-6">
+              <div className="bg-slate-100 p-1 rounded-xl inline-flex border border-slate-200 shadow-inner flex-wrap justify-center gap-1">
+                <button
+                  onClick={() => setFunnelType('smart')}
+                  className={`px-4 py-2 rounded-lg text-[9px] font-black transition-all ${funnelType === 'smart' ? 'bg-white text-emerald-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  Smart Funnel (Filters Negative Reviews)
+                </button>
+                <button
+                  onClick={() => setFunnelType('direct')}
+                  className={`px-4 py-2 rounded-lg text-[9px] font-black transition-all ${funnelType === 'direct' ? 'bg-white text-indigo-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  Direct Funnel (Direct Google Reviews)
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
               <div className="bg-white p-6 rounded-3xl border border-slate-200 text-left flex flex-col justify-between hover:shadow-md transition-all">
                 <div>
-                  <h3 className="font-extrabold text-slate-800 text-base">Starter Plan</h3>
+                  <h3 className="font-extrabold text-slate-800 text-base">
+                    {funnelType === 'smart' ? 'Starter Plan' : 'Starter Direct Plan'}
+                  </h3>
                   <span className="text-[9px] font-bold text-slate-400 block mt-0.5">Best for single physical stores</span>
                   <div className="my-4">
                     <span className="text-2xl font-black text-slate-900">₹399</span>
                     <span className="text-slate-400 text-xs font-bold">/ month</span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-                    1 business location, 1 NFC card support, unlimited scans, branded QR customizer, private feedback routing, and 30-day analytics history.
+                    {funnelType === 'smart' 
+                      ? "1 business location, 1 NFC card support, unlimited scans, branded QR customizer, private feedback routing, and 30-day analytics history."
+                      : "1 business location, 1 NFC card support, unlimited scans, branded QR customizer, direct Google Review routing (1-5★), and 30-day analytics history."
+                    }
                   </p>
                 </div>
                 <Link
@@ -144,14 +170,19 @@ export default function MarketingPage({ params }: { params: { locale: string } }
                   Popular
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-800 text-base">Growth Plan</h3>
+                  <h3 className="font-extrabold text-slate-800 text-base">
+                    {funnelType === 'smart' ? 'Growth Plan' : 'Growth Direct Plan'}
+                  </h3>
                   <span className="text-[9px] font-bold text-slate-400 block mt-0.5">Best for franchises & chains</span>
                   <div className="my-4">
                     <span className="text-2xl font-black text-slate-900">₹799</span>
                     <span className="text-slate-400 text-xs font-bold">/ month</span>
                   </div>
                   <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-                    Up to 3 physical locations, 3-month analytics history, peak time heatmap analytics, CSV exports, white-label toggles, and API access.
+                    {funnelType === 'smart' 
+                      ? "Up to 3 physical locations, 3-month analytics history, peak time heatmap analytics, CSV exports, white-label toggles, and API access."
+                      : "Up to 3 locations, 3-month analytics history, peak scan heatmap, CSV exports, white-label toggles (no branding), direct Google routing, and API access."
+                    }
                   </p>
                 </div>
                 <Link

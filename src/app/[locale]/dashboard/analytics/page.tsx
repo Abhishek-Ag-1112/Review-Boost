@@ -147,7 +147,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
 
   // Export Analytics CSV
   const handleExportCSV = () => {
-    if (business.plan !== 'growth') {
+    if (business.plan !== 'growth' && business.plan !== 'growth_direct') {
       alert('CSV Export is available on the Growth plan. Please upgrade to unlock.');
       return;
     }
@@ -187,7 +187,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* Location / Branch filter */}
           <div className="relative">
-            {business.plan === 'growth' ? (
+            {business.plan === 'growth' || business.plan === 'growth_direct' ? (
               <select
                 value={selectedLocationId}
                 onChange={(e) => setSelectedLocationId(e.target.value)}
@@ -216,7 +216,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
               value={dateRange}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10);
-                if (val > 30 && business.plan !== 'growth') {
+                if (val > 30 && business.plan !== 'growth' && business.plan !== 'growth_direct') {
                   alert('90 Days analytics history is a Growth plan feature. Please upgrade to unlock.');
                   return;
                 }
@@ -226,7 +226,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
             >
               <option value="7">Last 7 Days</option>
               <option value="30">Last 30 Days</option>
-              {business.plan === 'growth' ? (
+              {business.plan === 'growth' || business.plan === 'growth_direct' ? (
                 <option value="90">Last 90 Days (3 Months)</option>
               ) : (
                 <option value="90" disabled>Last 90 Days (Growth Only)</option>
@@ -441,7 +441,7 @@ export default function AnalyticsDashboard({ params }: { params: { locale: strin
             </div>
           </div>
           
-          {business.plan !== 'growth' && (
+          {business.plan !== 'growth' && business.plan !== 'growth_direct' && (
             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 z-10 animate-fade-in">
               <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 shadow-inner">
                 <Clock className="w-5 h-5" />

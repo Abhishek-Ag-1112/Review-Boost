@@ -86,18 +86,14 @@ export default function BillingPage({ params }: BillingPageProps) {
 
   const planLabels: Record<string, string> = {
     free: 'Free Trial',
+    free_direct: 'Free Trial (Direct)',
     starter: 'Starter (₹399/mo)',
+    starter_direct: 'Starter Direct (₹399/mo)',
     growth: 'Growth (₹799/mo)',
+    growth_direct: 'Growth Direct (₹799/mo)',
   };
 
-  // Determine available upgrade and downgrade plans
-  const upgradePlan: 'starter' | 'growth' | null = 
-    business.plan === 'free' ? 'starter' : business.plan === 'starter' ? 'growth' : null;
-  const downgradePlan: 'starter' | 'free' | null = 
-    business.plan === 'growth' ? 'starter' : business.plan === 'starter' ? 'free' : null;
-
-  const targetPlan = selectedChange === 'upgrade' ? upgradePlan : selectedChange === 'downgrade' ? downgradePlan : upgradePlan;
-  const canChange = upgradePlan || downgradePlan;
+  const canChange = true;
 
   const handleRequestPlanChange = async (plan: string) => {
     if (!plan) return;
@@ -128,8 +124,7 @@ export default function BillingPage({ params }: BillingPageProps) {
     }
   };
 
-  const changeDirection = selectedChange === 'downgrade' ? 'downgrade' : 'upgrade';
-  const messageText = `Hello ReviewPe Support, I would like to change my business "${business.name}" plan from ${planLabels[business.plan]} to ${targetPlan ? planLabels[targetPlan] : 'another plan'}. Please coordinate.`;
+  const messageText = `Hello ReviewPe Support, I would like to change my business "${business.name}" plan from ${planLabels[business.plan]}. Please coordinate.`;
   const emailUrl = `mailto:${supportEmail}?subject=ReviewPe%20Plan%20Change%20Request&body=${encodeURIComponent(messageText)}`;
   const whatsappUrl = `https://wa.me/${supportPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(messageText)}`;
 
@@ -155,7 +150,7 @@ export default function BillingPage({ params }: BillingPageProps) {
           </div>
 
           {/* Plan Status */}
-          {business.plan === 'free' ? (
+          {business.plan === 'free' || business.plan === 'free_direct' ? (
             <div className="space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -198,97 +193,202 @@ export default function BillingPage({ params }: BillingPageProps) {
           <div className="space-y-4">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Current Plan</span>
             <div>
-              <h4 className="text-xl font-black text-slate-800">
-                {business.plan === 'free' ? 'Free Trial' : business.plan === 'starter' ? 'Starter Tier' : 'Growth Tier'}
+              <h4 className="text-xl font-black text-slate-850">
+                {planLabels[business.plan]}
               </h4>
-              <span className="text-xs font-bold text-slate-400 block mt-1">
-                {business.plan === 'free' ? '30-day trial' : business.plan === 'starter' ? '₹399/month' : '₹799/month'}
-              </span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 mt-2">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-655 mt-2">
               <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
               <span>Started: {new Date(business.trial_started_at).toLocaleDateString()}</span>
             </div>
           </div>
           <div className="border-t border-slate-200 mt-6 pt-4 text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <ShieldCheck className="w-4 h-4 text-emerald-650" />
             <span>Plans managed by admin</span>
           </div>
         </div>
       </div>
 
-      {/* Plan Comparison — Read Only */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Plan Comparison */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
         {/* Free */}
-        <div className={`bg-white rounded-3xl border p-6 shadow-sm relative ${business.plan === 'free' ? 'border-amber-400 ring-2 ring-amber-50' : 'border-slate-150'}`}>
-          {business.plan === 'free' && (
-            <div className="absolute top-4 right-4 bg-amber-500 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Current
+        <div className={`bg-white rounded-3xl border p-5 shadow-sm relative flex flex-col justify-between ${(business.plan === 'free' || business.plan === 'free_direct') ? 'border-amber-400 ring-2 ring-amber-50' : 'border-slate-150'}`}>
+          <div>
+            {(business.plan === 'free' || business.plan === 'free_direct') && (
+              <div className="absolute top-4 right-4 bg-amber-500 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Current
+              </div>
+            )}
+            <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest block">
+              {business.plan === 'free_direct' ? 'Free Trial (Direct)' : 'Free Trial (Smart)'}
+            </span>
+            <h3 className="text-xl font-black text-slate-805 mt-2">₹0</h3>
+            <span className="text-xs font-bold text-slate-400">30-day trial</span>
+            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
+              {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{f}</span>
+                </div>
+              ))}
+              {['Multi-Language', 'Multiple Locations', 'NFC Cards', 'Developer API'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>{f}</span>
+                </div>
+              ))}
             </div>
-          )}
-          <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest block">Free Trial</span>
-          <h3 className="text-xl font-black text-slate-800 mt-2">₹0</h3>
-          <span className="text-xs font-bold text-slate-400">30-day trial</span>
-          <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
-            {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{f}</span>
-              </div>
-            ))}
-            {['Multi-Language', 'Multiple Locations', 'NFC Cards', 'Developer API'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                <Lock className="w-3.5 h-3.5" />
-                <span>{f}</span>
-              </div>
-            ))}
           </div>
+          <button
+            disabled
+            className="w-full mt-6 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+          >
+            {(business.plan === 'free' || business.plan === 'free_direct') ? 'Active Plan' : 'Unavailable'}
+          </button>
         </div>
 
-        {/* Starter */}
-        <div className={`bg-white rounded-3xl border p-6 shadow-sm relative ${business.plan === 'starter' ? 'border-emerald-600 ring-2 ring-emerald-50' : 'border-slate-150'}`}>
-          {business.plan === 'starter' && (
-            <div className="absolute top-4 right-4 bg-emerald-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Current
+        {/* Starter (Funnel) */}
+        <div className={`bg-white rounded-3xl border p-5 shadow-sm relative flex flex-col justify-between ${business.plan === 'starter' ? 'border-emerald-600 ring-2 ring-emerald-50' : 'border-slate-150'}`}>
+          <div>
+            {business.plan === 'starter' && (
+              <div className="absolute top-4 right-4 bg-emerald-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Current
+              </div>
+            )}
+            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block">Starter (Funnel)</span>
+            <h3 className="text-xl font-black text-slate-805 mt-2">₹399</h3>
+            <span className="text-xs font-bold text-slate-400">/month</span>
+            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
+              {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', '1 Location', '1 NFC Card'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{f}</span>
+                </div>
+              ))}
+              {['Multiple Locations', 'Developer API'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>{f}</span>
+                </div>
+              ))}
             </div>
-          )}
-          <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest block">Starter</span>
-          <h3 className="text-xl font-black text-slate-800 mt-2">₹399</h3>
-          <span className="text-xs font-bold text-slate-400">/month</span>
-          <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
-            {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', '1 Location', '1 NFC Card'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{f}</span>
-              </div>
-            ))}
-            {['Multiple Locations', 'Developer API'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                <Lock className="w-3.5 h-3.5" />
-                <span>{f}</span>
-              </div>
-            ))}
           </div>
+          <button
+            onClick={() => handleRequestPlanChange('starter')}
+            disabled={business.plan === 'starter' || requestSending}
+            className={`w-full mt-6 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              business.plan === 'starter' 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default font-extrabold' 
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm border-transparent hover:shadow-emerald-100'
+            }`}
+          >
+            {business.plan === 'starter' ? 'Active Plan' : 'Select Starter'}
+          </button>
         </div>
 
-        {/* Growth */}
-        <div className={`bg-white rounded-3xl border p-6 shadow-sm relative ${business.plan === 'growth' ? 'border-indigo-600 ring-2 ring-indigo-50' : 'border-slate-150'}`}>
-          {business.plan === 'growth' && (
-            <div className="absolute top-4 right-4 bg-indigo-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Current
-            </div>
-          )}
-          <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest block">Growth</span>
-          <h3 className="text-xl font-black text-slate-800 mt-2">₹799</h3>
-          <span className="text-xs font-bold text-slate-400">/month</span>
-          <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
-            {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', 'Up to 3 Locations', 'Up to 3 NFC Cards', '3-Month Analytics History', 'Peak Scan Heatmap', 'Developer API', 'White-label'].map(f => (
-              <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-605">
-                <Check className="w-3.5 h-3.5 text-indigo-600" />
-                <span>{f}</span>
+        {/* Starter Direct */}
+        <div className={`bg-white rounded-3xl border p-5 shadow-sm relative flex flex-col justify-between ${business.plan === 'starter_direct' ? 'border-teal-600 ring-2 ring-teal-50' : 'border-slate-150'}`}>
+          <div>
+            {business.plan === 'starter_direct' && (
+              <div className="absolute top-4 right-4 bg-teal-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Current
               </div>
-            ))}
+            )}
+            <span className="text-[10px] font-extrabold text-teal-600 uppercase tracking-widest block">Starter Direct</span>
+            <h3 className="text-xl font-black text-slate-805 mt-2">₹399</h3>
+            <span className="text-xs font-bold text-slate-400">/month</span>
+            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
+              {['Direct Google Routing', 'AI Suggestions (All Stars)', 'WhatsApp/Email Alerts', 'Multi-Language', '1 Location', '1 NFC Card'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{f}</span>
+                </div>
+              ))}
+              {['Multiple Locations', 'Developer API'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
           </div>
+          <button
+            onClick={() => handleRequestPlanChange('starter_direct')}
+            disabled={business.plan === 'starter_direct' || requestSending}
+            className={`w-full mt-6 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              business.plan === 'starter_direct' 
+                ? 'bg-teal-50 text-teal-700 border-teal-200 cursor-default font-extrabold' 
+                : 'bg-teal-600 hover:bg-teal-700 text-white shadow-sm border-transparent hover:shadow-teal-100'
+            }`}
+          >
+            {business.plan === 'starter_direct' ? 'Active Plan' : 'Select Starter Direct'}
+          </button>
+        </div>
+
+        {/* Growth (Funnel) */}
+        <div className={`bg-white rounded-3xl border p-5 shadow-sm relative flex flex-col justify-between ${business.plan === 'growth' ? 'border-indigo-600 ring-2 ring-indigo-50' : 'border-slate-150'}`}>
+          <div>
+            {business.plan === 'growth' && (
+              <div className="absolute top-4 right-4 bg-indigo-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Current
+              </div>
+            )}
+            <span className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest block">Growth (Funnel)</span>
+            <h3 className="text-xl font-black text-slate-805 mt-2">₹799</h3>
+            <span className="text-xs font-bold text-slate-400">/month</span>
+            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
+              {['QR Review Funnel', 'AI Suggestions', 'WhatsApp/Email Alerts', 'Multi-Language', 'Up to 3 Locations', 'Up to 3 NFC Cards', '3-Month Analytics History', 'Peak Scan Heatmap', 'Developer API', 'White-label'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <Check className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => handleRequestPlanChange('growth')}
+            disabled={business.plan === 'growth' || requestSending}
+            className={`w-full mt-6 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              business.plan === 'growth' 
+                ? 'bg-indigo-50 text-indigo-700 border-indigo-200 cursor-default font-extrabold' 
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm border-transparent hover:shadow-indigo-150'
+            }`}
+          >
+            {business.plan === 'growth' ? 'Active Plan' : 'Select Growth'}
+          </button>
+        </div>
+
+        {/* Growth Direct */}
+        <div className={`bg-white rounded-3xl border p-5 shadow-sm relative flex flex-col justify-between ${business.plan === 'growth_direct' ? 'border-violet-600 ring-2 ring-violet-50' : 'border-slate-150'}`}>
+          <div>
+            {business.plan === 'growth_direct' && (
+              <div className="absolute top-4 right-4 bg-violet-600 text-white font-extrabold text-[9px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Current
+              </div>
+            )}
+            <span className="text-[10px] font-extrabold text-violet-600 uppercase tracking-widest block">Growth Direct</span>
+            <h3 className="text-xl font-black text-slate-805 mt-2">₹799</h3>
+            <span className="text-xs font-bold text-slate-400">/month</span>
+            <div className="border-t border-slate-100 mt-4 pt-4 space-y-2.5">
+              {['Direct Google Routing', 'AI Suggestions (All Stars)', 'WhatsApp/Email Alerts', 'Multi-Language', 'Up to 3 Locations', 'Up to 3 NFC Cards', '3-Month Analytics History', 'Peak Scan Heatmap', 'Developer API', 'White-label'].map(f => (
+                <div key={f} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                  <Check className="w-3.5 h-3.5 text-violet-600" />
+                  <span>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => handleRequestPlanChange('growth_direct')}
+            disabled={business.plan === 'growth_direct' || requestSending}
+            className={`w-full mt-6 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+              business.plan === 'growth_direct' 
+                ? 'bg-violet-50 text-violet-750 border-violet-200 cursor-default font-extrabold' 
+                : 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm border-transparent hover:shadow-violet-100'
+            }`}
+          >
+            {business.plan === 'growth_direct' ? 'Active Plan' : 'Select Growth Direct'}
+          </button>
         </div>
       </div>
 
@@ -316,58 +416,24 @@ export default function BillingPage({ params }: BillingPageProps) {
           ) : (
             <div className="space-y-5">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-black text-slate-800 text-sm">Change Your Plan</h3>
+                <Sparkles className="w-5 h-5 text-indigo-650" />
+                <h3 className="font-black text-slate-800 text-sm">Request Plan Change</h3>
               </div>
               <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-                You are currently on <strong className="text-slate-700">{planLabels[business.plan]}</strong>. Submit a request below and our admin team will process the change.
+                You are currently on <strong className="text-slate-700">{planLabels[business.plan]}</strong>. Click on one of the plan cards above to request a plan change, or get in touch with our team:
               </p>
               <div className="flex flex-wrap gap-3">
-                {upgradePlan && (
-                  <button
-                    onClick={() => handleRequestPlanChange(upgradePlan)}
-                    disabled={requestSending}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl font-bold text-xs transition-all shadow-md hover:shadow-indigo-100 flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  >
-                    {requestSending ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <><ArrowUpRight className="w-4 h-4" /><span>Upgrade to {planLabels[upgradePlan]}</span></>
-                    )}
-                  </button>
-                )}
-                {downgradePlan && (
-                  <button
-                    onClick={() => handleRequestPlanChange(downgradePlan)}
-                    disabled={requestSending}
-                    className="bg-white border-2 border-slate-200 hover:border-rose-300 hover:bg-rose-50/30 text-slate-700 py-3 px-6 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  >
-                    {requestSending ? (
-                      <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <><ArrowDownRight className="w-4 h-4 text-rose-500" /><span>Downgrade to {planLabels[downgradePlan]}</span></>
-                    )}
-                  </button>
-                )}
                 <a href={whatsappUrl} target="_blank" rel="noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
-                  <MessageCircle className="w-4 h-4" /><span>WhatsApp</span>
+                  <MessageCircle className="w-4 h-4" /><span>WhatsApp Support</span>
                 </a>
                 <a href={emailUrl} className="bg-slate-800 hover:bg-slate-700 text-white py-3 px-5 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5">
-                  <Mail className="w-4 h-4" /><span>Email</span>
+                  <Mail className="w-4 h-4" /><span>Email Support</span>
                 </a>
               </div>
             </div>
           )}
         </div>
-      ) : (
-        <div className="bg-slate-50/50 border border-slate-100 rounded-3xl p-6 text-center">
-          <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto mb-3" />
-          <h3 className="font-black text-slate-800 text-sm">You&apos;re on the Free Trial</h3>
-          <p className="text-xs font-semibold text-slate-400 mt-1">
-            Contact support to get started with a paid plan.
-          </p>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

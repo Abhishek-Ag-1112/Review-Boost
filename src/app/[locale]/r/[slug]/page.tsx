@@ -88,7 +88,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   }
 
   // Monthly scans limit verification for Free plans
-  if (business.plan === 'free') {
+  if (business.plan === 'free' || business.plan === 'free_direct') {
     const scanCount = await getScansCountThisMonth(business.id);
     if (scanCount >= 50) {
       return (

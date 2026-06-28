@@ -164,7 +164,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
     }
   };
 
-  const isFreePlan = business.plan === 'free';
+  const isFreePlan = business.plan === 'free' || business.plan === 'free_direct';
   const showLogoInQR = !isFreePlan && business.logo_url;
 
   return (
@@ -177,7 +177,7 @@ export default function QRGenerator({ params }: { params: { locale: string } }) 
           
           {/* Branch Dropdown Selector */}
           <div className="w-full mt-4">
-            {business.plan === 'growth' ? (
+            {business.plan === 'growth' || business.plan === 'growth_direct' ? (
               <select
                 value={selectedLocationId}
                 onChange={(e) => setSelectedLocationId(e.target.value)}

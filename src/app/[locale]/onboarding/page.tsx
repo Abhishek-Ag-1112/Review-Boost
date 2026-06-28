@@ -73,6 +73,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
   const [slug, setSlug] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [reviewMode, setReviewMode] = useState<'smart' | 'direct'>('smart');
 
   useEffect(() => {
     setMounted(true);
@@ -92,6 +93,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
         setTagline(state.tagline || '');
         setPrimaryLang(state.primaryLang || 'en');
         setSlug(state.slug || '');
+        setReviewMode(state.reviewMode || 'smart');
       } catch (e) {
         console.error('Failed to parse onboarding state', e);
       }
@@ -112,10 +114,11 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
       brandColor,
       tagline,
       primaryLang,
-      slug
+      slug,
+      reviewMode
     };
     localStorage.setItem('reviewpe_onboarding_state', JSON.stringify(state));
-  }, [step, category, name, googlePlaceId, email, whatsapp, logoBase64, brandColor, tagline, primaryLang, slug, mounted]);
+  }, [step, category, name, googlePlaceId, email, whatsapp, logoBase64, brandColor, tagline, primaryLang, slug, reviewMode, mounted]);
 
   if (!mounted) return null;
 
@@ -221,7 +224,7 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
           language: primaryLang,
           whatsapp_number: whatsapp,
           notification_email: email,
-          plan: 'free' // Start onboarding merchants on the Free tier
+          plan: reviewMode === 'smart' ? 'free' : 'free_direct' // Start onboarding merchants on the selected Free tier
         })
       });
 
@@ -504,6 +507,31 @@ export default function OnboardingWizard({ params }: { params: { locale: string 
                   <option value="te">Telugu (తెలుగు)</option>
                   <option value="kn">Kannada (ಕನ್ನಡ)</option>
                 </select>
+              </div>
+
+              {/* Review Routing Mode */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1.5">Review Routing Mode</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    key="mode-smart"
+                    type="button"
+                    onClick={() => setReviewMode('smart')}
+                    className={`p-3 text-left border rounded-xl transition-all ${reviewMode === 'smart' ? 'border-emerald-600 bg-emerald-50/10 ring-2 ring-emerald-50' : 'border-slate-200'}`}
+                  >
+                    <span className="block text-xs font-black text-slate-800">Smart Funnel</span>
+                    <span className="block text-[9px] text-slate-400 mt-0.5 leading-snug">Filters 1-3★ ratings to private form</span>
+                  </button>
+                  <button
+                    key="mode-direct"
+                    type="button"
+                    onClick={() => setReviewMode('direct')}
+                    className={`p-3 text-left border rounded-xl transition-all ${reviewMode === 'direct' ? 'border-emerald-600 bg-emerald-50/10 ring-2 ring-emerald-50' : 'border-slate-200'}`}
+                  >
+                    <span className="block text-xs font-black text-slate-800">Direct Route</span>
+                    <span className="block text-[9px] text-slate-400 mt-0.5 leading-snug">Redirects all ratings straight to Google</span>
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -9,8 +9,6 @@ export const isFirebaseAdminMock =
   !supabaseAnonKey ||
   supabaseUrl.includes('your-project');
 
-export const adminAuth = null as any;
-
 // Helper to verify the secure session cookie (using Supabase Auth getUser)
 export async function verifyFirebaseSession(sessionCookie: string) {
   if (isFirebaseAdminMock) {

@@ -5,7 +5,7 @@ import { Lock, Check, Sparkles, MessageCircle, Mail } from 'lucide-react';
 
 interface UpgradeGateProps {
   businessName: string;
-  currentPlan: 'free' | 'starter' | 'growth';
+  currentPlan: 'free' | 'starter' | 'growth' | 'starter_direct' | 'growth_direct';
   planNeeded: 'growth';
   featureName: string;
   benefits: string[];

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!['free', 'starter', 'growth'].includes(requested_plan)) {
+    if (!['free', 'starter', 'growth', 'starter_direct', 'growth_direct'].includes(requested_plan)) {
       return NextResponse.json({ error: 'Invalid requested plan' }, { status: 400 });
     }
 
@@ -58,17 +58,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-      const decoded = await verifyFirebaseSession(sessionCookie);
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
-      // Allow mock sessions and admin email
-      const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
-      const isAdmin = isMockAdmin || decoded.email === adminEmail;
-      if (!isAdmin) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
+    let isAdmin = isMockAdmin;
+
+    if (!isMockAdmin) {
+      try {
+        const decoded = await verifyFirebaseSession(sessionCookie);
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
+        isAdmin = decoded.email === adminEmail;
+      } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-    } catch {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const requests = await getAllUpgradeRequests();
@@ -87,16 +91,21 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-      const decoded = await verifyFirebaseSession(sessionCookie);
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
-      const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
-      const isAdmin = isMockAdmin || decoded.email === adminEmail;
-      if (!isAdmin) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const isMockAdmin = sessionCookie === 'mock-admin-session-cookie';
+    let isAdmin = isMockAdmin;
+
+    if (!isMockAdmin) {
+      try {
+        const decoded = await verifyFirebaseSession(sessionCookie);
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@reviewpe.online';
+        isAdmin = decoded.email === adminEmail;
+      } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
-    } catch {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await request.json();

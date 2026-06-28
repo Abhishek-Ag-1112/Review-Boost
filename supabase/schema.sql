@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   notification_email TEXT,
 
   -- Plan & subscription
-  plan TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'starter', 'growth')),
+  plan TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'starter', 'growth', 'starter_direct', 'growth_direct', 'free_direct')),
   is_active BOOLEAN DEFAULT true,
   trial_started_at TIMESTAMPTZ DEFAULT now(),
   trial_ended BOOLEAN DEFAULT false,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
   razorpay_subscription_id TEXT,
   razorpay_payment_id TEXT,
-  plan TEXT NOT NULL CHECK (plan IN ('starter', 'growth')),
+  plan TEXT NOT NULL CHECK (plan IN ('starter', 'growth', 'starter_direct', 'growth_direct')),
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'halted', 'cancelled', 'completed')),
   amount INTEGER NOT NULL,
   started_at TIMESTAMPTZ DEFAULT now(),
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS public.upgrade_requests (
   business_id UUID NOT NULL REFERENCES public.businesses(id) ON DELETE CASCADE,
   business_name TEXT NOT NULL,
   current_plan TEXT NOT NULL,
-  requested_plan TEXT NOT NULL CHECK (requested_plan IN ('free', 'starter', 'growth')),
+  requested_plan TEXT NOT NULL CHECK (requested_plan IN ('free', 'starter', 'growth', 'starter_direct', 'growth_direct', 'free_direct')),
   contact_email TEXT,
   contact_phone TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),

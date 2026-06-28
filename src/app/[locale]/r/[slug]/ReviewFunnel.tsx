@@ -80,6 +80,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
 
   // Set page brand styling dynamically
   const brandColor = business.brand_color || '#000000';
+  const isDirectPlan = business.plan === 'starter_direct' || business.plan === 'growth_direct' || business.plan === 'free_direct';
 
   // 1. Asynchronously log scan on mount (fire and forget)
   useEffect(() => {
@@ -137,7 +138,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
 
   const handleStarClick = (rating: number) => {
     setStars(rating);
-    if (rating >= 4) {
+    if (rating >= 4 || isDirectPlan) {
       fetchSuggestions(rating);
     }
     setStep(2);
@@ -333,8 +334,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
             />
           )}
 
-          {/* STEP 2A: Happy Path (4-5 Stars) */}
-          {step === 2 && stars && stars >= 4 && (
+          {/* STEP 2A: Happy Path (4-5 Stars or Direct plans for all ratings) */}
+          {step === 2 && stars && (stars >= 4 || isDirectPlan) && (
             <div className="w-full flex flex-col">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="flex items-center gap-1 text-xs font-semibold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-full">
@@ -413,8 +414,8 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
             </div>
           )}
 
-          {/* STEP 2B: Private Path (1-3 Stars) */}
-          {step === 2 && stars && stars <= 3 && (
+          {/* STEP 2B: Private Path (1-3 Stars and not a Direct plan) */}
+          {step === 2 && stars && stars <= 3 && !isDirectPlan && (
             <form onSubmit={submitPrivatePath} className="w-full flex flex-col">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <span className="flex items-center gap-1 text-xs font-semibold text-amber-500 bg-amber-50 px-2.5 py-1 rounded-full">
@@ -511,7 +512,7 @@ export default function ReviewFunnel({ business, currentLocale }: ReviewFunnelPr
         </div>
 
         {/* Footer Powered By */}
-        {!(business.plan === 'growth' && business.hide_branding) && (
+        {!((business.plan === 'growth' || business.plan === 'growth_direct') && business.hide_branding) && (
           <div className="py-3 bg-slate-50 border-t border-slate-100 text-center">
             <span className="text-[10px] font-semibold text-slate-400 tracking-widest uppercase">
               Powered by ReviewPe

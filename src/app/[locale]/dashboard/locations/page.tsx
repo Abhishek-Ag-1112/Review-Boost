@@ -212,9 +212,9 @@ export default function LocationsPage({ params }: { params: { locale: string } }
         </div>
         <button
           onClick={() => {
-            if ((business.plan === 'starter' || business.plan === 'free') && locations.length >= 0) {
+            if ((business.plan === 'starter' || business.plan === 'starter_direct' || business.plan === 'free' || business.plan === 'free_direct') && locations.length >= 0) {
               setShowUpgradeModal(true);
-            } else if (business.plan === 'growth' && locations.length >= 2) {
+            } else if ((business.plan === 'growth' || business.plan === 'growth_direct') && locations.length >= 2) {
               alert('You have reached the maximum limit of 3 locations (1 main + 2 branches) on the Growth plan.');
             } else {
               setShowAddModal(true);
