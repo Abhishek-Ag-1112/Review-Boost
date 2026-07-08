@@ -17,9 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1.0,
   });
 
-  // 2. Add localized routes for Home and Pricing
+  // 2. Add localized routes for Home, Pricing, FAQ, Contact, and How to Use
   for (const locale of locales) {
-    // Localized Home page (e.g., https://reviewpe.online/en)
+    // Localized Home page
     sitemapEntries.push({
       url: `${baseUrl}/${locale}`,
       lastModified: new Date(),
@@ -27,9 +27,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     });
 
-    // Localized Pricing page (e.g., https://reviewpe.online/en/pricing)
+    // Localized Pricing page
     sitemapEntries.push({
       url: `${baseUrl}/${locale}/pricing`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
+
+    // Localized FAQ page
+    sitemapEntries.push({
+      url: `${baseUrl}/${locale}/faq`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    });
+
+    // Localized Contact page
+    sitemapEntries.push({
+      url: `${baseUrl}/${locale}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    });
+
+    // Localized How to Use page
+    sitemapEntries.push({
+      url: `${baseUrl}/${locale}/how-to-use`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
@@ -37,14 +61,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // 3. Add dynamic business review routes (e.g., https://reviewpe.online/en/r/business-slug)
-  let businessSlugs: { slug: string; updated_at?: string }[] = [];
+  let businessSlugs: { slug: string; created_at?: string }[] = [];
 
   if (!isMockMode) {
     try {
       const supabase = createAdminClient();
       const { data, error } = await supabase
         .from('businesses')
-        .select('slug, updated_at')
+        .select('slug, created_at')
         .eq('is_active', true)
         .eq('trial_ended', false);
 
@@ -65,7 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const locale of locales) {
       sitemapEntries.push({
         url: `${baseUrl}/${locale}/r/${business.slug}`,
-        lastModified: business.updated_at ? new Date(business.updated_at) : new Date(),
+        lastModified: business.created_at ? new Date(business.created_at) : new Date(),
         changeFrequency: 'weekly',
         priority: 0.6,
       });

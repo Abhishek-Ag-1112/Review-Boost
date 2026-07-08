@@ -447,8 +447,38 @@ export default function PricingPage({ params }: PricingPageProps) {
       </section>
 
       {/* Footer Branding */}
-      <footer className="text-center pt-24 pb-4 text-[10px] font-black text-slate-400 uppercase tracking-wide">
+      <footer className="text-center pt-24 pb-4 flex flex-col items-center justify-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-wide">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-black text-slate-500 uppercase tracking-widest pb-2 border-b border-slate-100/50 w-full max-w-md">
+          <Link href={`/${locale}`} className="hover:text-emerald-600 transition-colors">Home</Link>
+          <Link href={`/${locale}/pricing`} className="hover:text-emerald-600 transition-colors">Pricing</Link>
+          <Link href={`/${locale}/how-to-use`} className="hover:text-emerald-600 transition-colors">How to Use</Link>
+          <Link href={`/${locale}/faq`} className="hover:text-emerald-600 transition-colors">FAQ</Link>
+          <Link href={`/${locale}/contact`} className="hover:text-emerald-600 transition-colors">Contact Us</Link>
+        </div>
         <p>© {new Date().getFullYear()} ReviewPe. All Rights Reserved. Indian local business assistance.</p>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://www.instagram.com/reviewpe.online?igsh=ODN6ZmI0anp3NjQ1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-slate-400 hover:text-emerald-600 transition-colors normal-case font-bold"
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+            <span>@reviewpe.online</span>
+          </a>
+        </div>
       </footer>
     </div>
   );
