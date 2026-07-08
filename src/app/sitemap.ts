@@ -6,7 +6,7 @@ import { createAdminClient, isMockMode } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://reviewpe.online';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.reviewpe.online';
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
   // 1. Add main root URL
