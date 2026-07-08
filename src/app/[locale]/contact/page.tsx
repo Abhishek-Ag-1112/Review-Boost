@@ -3,22 +3,46 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Send, Check } from 'lucide-react';
+import { createClient, isMockMode } from '@/lib/supabase';
 
 export default function ContactPage({ params }: { params: { locale: string } }) {
   const { locale } = params;
   const [emailInput, setEmailInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput || !messageInput) return;
-    setFormSubmitted(true);
-    // Simulate submission delay or action
-    setTimeout(() => {
+
+    setLoading(true);
+    setError('');
+
+    try {
+      if (isMockMode) {
+        console.log('[MOCK CONTACT] Inquiry submitted:', { emailInput, messageInput });
+        setFormSubmitted(true);
+      } else {
+        const supabase = createClient();
+        const { error: dbError } = await supabase
+          .from('contact_inquiries')
+          .insert([
+            { email: emailInput, message: messageInput }
+          ]);
+
+        if (dbError) throw dbError;
+        setFormSubmitted(true);
+      }
       setEmailInput('');
       setMessageInput('');
-    }, 2000);
+    } catch (err: any) {
+      console.error('Failed to submit contact message:', err);
+      setError(err.message || 'Failed to send inquiry. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const supportEmail = 'abhishek040478@gmail.com';
@@ -147,42 +171,51 @@ export default function ContactPage({ params }: { params: { locale: string } }) 
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-100 text-red-650 text-xs font-bold rounded-xl">
+                    {error}
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-xs font-black uppercase text-slate-450 tracking-wider block">
+                  <label htmlFor="email" className="text-xs font-black uppercase text-slate-455 tracking-wider block">
                     Your Email Address
                   </label>
                   <input
                     id="email"
                     type="email"
                     required
+                    disabled={loading}
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-semibold transition-all"
+                    className="w-full h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-semibold transition-all disabled:opacity-50"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="message" className="text-xs font-black uppercase text-slate-450 tracking-wider block">
+                  <label htmlFor="message" className="text-xs font-black uppercase text-slate-455 tracking-wider block">
                     How can we help you?
                   </label>
                   <textarea
                     id="message"
                     required
                     rows={5}
+                    disabled={loading}
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     placeholder="Describe your inquiry, request, or issue here..."
-                    className="w-full p-4 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-semibold transition-all resize-none"
+                    className="w-full p-4 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500 text-sm font-semibold transition-all resize-none disabled:opacity-50"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Send Inquiry</span>
+                  <span>{loading ? 'Sending...' : 'Send Inquiry'}</span>
                 </button>
               </form>
             )}
