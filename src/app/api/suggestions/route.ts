@@ -146,35 +146,51 @@ Example: ["suggestion 1", "suggestion 2", "suggestion 3", ..., "suggestion 15"]`
 
     console.log('Generating 15 fresh suggestions with Groq for business:', business_id || business_name);
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${groqApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.75,
-        max_tokens: 1200
-      })
-    });
+    let textResponse = '';
+    const modelsToTry = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 
-    if (!response.ok) {
-      throw new Error(`Groq API returned status ${response.status}`);
+    for (const model of modelsToTry) {
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${groqApiKey}`
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 1500
+          })
+        });
+
+        if (response.ok) {
+          const resJson = await response.json();
+          textResponse = resJson.choices?.[0]?.message?.content?.trim() || '';
+          if (textResponse) break;
+        } else {
+          console.warn(`Groq model ${model} failed with status ${response.status}:`, await response.text());
+        }
+      } catch (callErr) {
+        console.warn(`Groq model ${model} fetch error:`, callErr);
+      }
     }
 
-    const resJson = await response.json();
-    let textResponse = resJson.choices?.[0]?.message?.content?.trim() || '';
+    if (!textResponse) {
+      throw new Error('All Groq models failed to return response');
+    }
 
-    // Strip out markdown code blocks if the model wrapped it
+    // Strip out markdown code blocks or thought blocks if the model wrapped it
+    if (textResponse.includes('<think>')) {
+      textResponse = textResponse.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+    }
     if (textResponse.startsWith('```')) {
       textResponse = textResponse
-        .replace(/^```json/, '')
-        .replace(/^```/, '')
+        .replace(/^```(?:json)?/, '')
         .replace(/```$/, '')
         .trim();
     }
