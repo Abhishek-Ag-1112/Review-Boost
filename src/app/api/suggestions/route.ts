@@ -195,19 +195,25 @@ Example: ["suggestion 1", "suggestion 2", "suggestion 3", ..., "suggestion 15"]`
         .trim();
     }
 
-    let parsedSuggestions: string[];
+    let parsedSuggestions: string[] = fallbackList;
+    let isAiGenerated = false;
+
     try {
-      parsedSuggestions = JSON.parse(textResponse);
-      if (!Array.isArray(parsedSuggestions) || parsedSuggestions.length < 5) {
+      const jsonParsed = JSON.parse(textResponse);
+      if (Array.isArray(jsonParsed) && jsonParsed.length >= 5) {
+        parsedSuggestions = jsonParsed;
+        isAiGenerated = true;
+      } else {
         throw new Error('Not an array or contains less than 5 items');
       }
     } catch (e) {
-      console.warn('Groq response parsing failed, returning fallback list.', textResponse);
+      console.warn('Groq response parsing failed, serving temporary fallback list without caching.', textResponse);
       parsedSuggestions = fallbackList;
+      isAiGenerated = false;
     }
 
-    // Cache the fresh suggestions in Supabase
-    if (business && supabase) {
+    // Cache ONLY genuine AI-generated suggestions in Supabase (never cache hardcoded fallbacks)
+    if (isAiGenerated && business && supabase) {
       try {
         const updatePayload: any = {
           ai_suggestions_updated_at: new Date().toISOString()
@@ -222,7 +228,7 @@ Example: ["suggestion 1", "suggestion 2", "suggestion 3", ..., "suggestion 15"]`
           .from('businesses')
           .update(updatePayload)
           .eq('id', business.id);
-        console.log('Suggestions cached in database successfully.');
+        console.log('Genuine AI suggestions cached in database successfully.');
       } catch (cacheErr) {
         console.error('Failed to cache suggestions in DB:', cacheErr);
       }
